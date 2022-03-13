@@ -68,6 +68,7 @@ async function startup() {
 
 app.get("/search", (request, response) => {
     response.type('json');
+    response.header("Access-Control-Allow-Origin", "*");
     let search_title = request.query.title;
     let search_viewers = request.query.viewers;
     let search_game = request.query.game;
