@@ -90,6 +90,12 @@ app.get("/search", (request, response) => {
     response.send(JSON.stringify(api_response));
 });
 
+app.get("/", (request, response) => {
+    response.type('html');
+    let html = "<h1>Docs</h1><h2>Endpoints</h2><p>/search</p><ul><li>title</li><li>viewers</li><li>game</li><li>language</li></ul>";
+    response.send(html);
+});
+
 app.listen(3000, () => {
     startup()
     console.log("Listen on the port 3000...");
