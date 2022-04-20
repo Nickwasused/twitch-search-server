@@ -173,19 +173,28 @@ app.get("/code", (request, response) => {
     response.type('json');
     response.header("Access-Control-Allow-Origin", "*");
     let code = request.query.code;
-    let token_gen = get_auth_token(code);
-    if (token_gen) {
-        setup_done = true;
-    }
-    if (code == undefined) {
+    let state = request.query.state;
+    if (state != current_state) {
+        console.log("wrong state returned");
         response.send({
             "status": "error"
         });
     } else {
-        response.send({
-            "status": "done"
-        });
+        let token_gen = get_auth_token(code);
+        if (token_gen) {
+            setup_done = true;
+        }
+        if (code == undefined) {
+            response.send({
+                "status": "error"
+            });
+        } else {
+            response.send({
+                "status": "done"
+            });
+        }
     }
+    
 });
 
 app.get("/", (request, response) => {
@@ -201,7 +210,7 @@ app.get("/", (request, response) => {
     } else {
         let state = generateRandomString(32);
         current_state = state;
-        response.redirect(301, `https://id.twitch.tv/oauth2/authorize?response_type=code&scope=&client_id=${client_id}&redirect_uri=${host}/code&${state}`);
+        response.redirect(301, `https://id.twitch.tv/oauth2/authorize?response_type=code&scope=&client_id=${client_id}&redirect_uri=${host}/code&state=${state}`);
     }
 });
 
