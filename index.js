@@ -75,10 +75,7 @@ async function fetchstreams() {
             .then(response => {
                 for (let i=0; i < response.data["data"].length; i++) {
                     let item = response.data["data"][i];
-                    temp_streams.push({
-                        "user_id": item["user_id"],
-                        "user_name": item["user_name"]
-                    })
+                    temp_streams.push(item);
                 }
                 paginator = response.data["pagination"]["cursor"];
                 if (response.data["data"].length == 0) {
