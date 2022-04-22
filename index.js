@@ -30,13 +30,8 @@ app.use(function(req, res, next) {
 
 // https://www.kindacode.com/article/how-to-easily-generate-a-random-string-in-node-js/
 const generateRandomString = (myLength) => {
-    const chars =
-      "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-    const randomArray = Array.from(
-      { length: myLength },
-      (v, k) => chars[Math.floor(Math.random() * chars.length)]
-    );
-  
+    const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
+    const randomArray = Array.from({ length: myLength }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
     const randomString = randomArray.join("");
     return randomString;
 };
@@ -73,10 +68,7 @@ async function fetchstreams() {
                 params: search_params
             })
             .then(response => {
-                for (let i=0; i < response.data["data"].length; i++) {
-                    let item = response.data["data"][i];
-                    temp_streams.push(item);
-                }
+                temp_streams = [...temp_streams, ...response.data.data];
                 paginator = response.data["pagination"]["cursor"];
                 if (response.data["data"].length == 0) {
                     fetching = false;
@@ -124,7 +116,6 @@ app.get("/search", (request, response) => {
             } else {
                 return stream;
             }
-            
         });
         response.send({
             "status": "done",
