@@ -47,7 +47,7 @@ async function checkFileExists(file){
 }
 
 async function fetchstreams() {
-    console.log("Starting to fetch Streams!")
+    console.log("Starting to fetch Streams!");
     let fetching = true;
     let token_valid = true;
     let temp_streams = [];
@@ -68,13 +68,20 @@ async function fetchstreams() {
             axios.get(streams_url, {
                 headers: {
                     "client-id": client_id,
-                    "Authorization": "Bearer " + access_token,
+                    "Authorization": "Bearer " + access_token
                 },
                 params: search_params
             })
             .then(response => {
                 for (let i=0; i < response.data["data"].length; i++) {
-                    temp_streams.push(response.data["data"][i])
+                    let item = response.data["data"][i];
+                    temp_streams.push({
+                        "user_name": item["user_name"],
+                        "game_id": item["game_name"],
+                        "title": item["title"],
+                        "language": item["language"],
+                        "viewer_count": item["viewer_count"]
+                    })
                 }
                 paginator = response.data["pagination"]["cursor"];
                 if (response.data["data"].length == 0) {
@@ -91,7 +98,7 @@ async function fetchstreams() {
         console.log(`fetched ${temp_streams.length} streams`)
     }
 
-    console.log("Done fetching Streams!")
+    console.log("Done fetching Streams!");
     paginator = "";
     streams = temp_streams;
     if (!token_valid) {
