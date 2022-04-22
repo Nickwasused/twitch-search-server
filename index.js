@@ -76,11 +76,8 @@ async function fetchstreams() {
                 for (let i=0; i < response.data["data"].length; i++) {
                     let item = response.data["data"][i];
                     temp_streams.push({
-                        "user_name": item["user_name"],
-                        "game_id": item["game_name"],
-                        "title": item["title"],
-                        "language": item["language"],
-                        "viewer_count": item["viewer_count"]
+                        "user_id": item["user_id"],
+                        "user_name": item["user_name"]
                     })
                 }
                 paginator = response.data["pagination"]["cursor"];
