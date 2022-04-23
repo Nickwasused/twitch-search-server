@@ -7,11 +7,10 @@ const SearchHandler = require('./search');
 
 app.use(compression());
 
-let fetch_interval = undefined;
-
 // auth stuff
 let current_state = "";
 let host = process.env.HOST;
+let client_id = process.env.CLIENT_ID;
 
 const search = new SearchHandler();
 
@@ -25,7 +24,6 @@ app.use(function(req, res, next) {
 app.get("/search", (request, response) => {
     if (search.setup_done) {
         response.type('json');
-        response.header("Access-Control-Allow-Origin", "*");
         let search_title = request.query.title;
         let search_viewers = request.query.viewers;
         let search_game = request.query.game;
@@ -50,7 +48,6 @@ app.get("/search", (request, response) => {
         });
     } else {
         response.type('json');
-        response.header("Access-Control-Allow-Origin", "*");
         response.send({
             "status": "setup"
         });
@@ -59,7 +56,6 @@ app.get("/search", (request, response) => {
 
 app.get("/code", (request, response) => {
     response.type('json');
-    response.header("Access-Control-Allow-Origin", "*");
     let code = request.query.code;
     let state = request.query.state;
     if (state != current_state) {
@@ -87,10 +83,6 @@ app.get("/code", (request, response) => {
 
 app.get("/", (request, response) => {
     if (search.setup_done) {
-        if (fetch_interval == undefined) {
-            search.fetchstreams();
-            search.fetch_interval = setInterval(search.fetchstreams, 300000);
-        }
         response.type('json');
         response.send({
             "status": "done"

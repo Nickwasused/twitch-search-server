@@ -17,6 +17,8 @@ class SearchHandler {
         this.setup_done = false;
         this.fetch_interval = undefined;
         this.streams = [];
+        this.access_token = "";
+        this.refresh_token = "";
         this.init();
     }
 
@@ -28,7 +30,7 @@ class SearchHandler {
             if (this.access_token != undefined && this.fetch_interval == undefined) {
                 this.setup_done = true;
                 await this.fetchstreams();
-                this.fetch_interval = setInterval(this.fetchstreams, 300000);
+                this.fetch_interval = setInterval(this.fetchstreams.bind(this), 300000);
             }
         }
     }
@@ -41,7 +43,7 @@ class SearchHandler {
         }
         await Promise.all([
             axios.post(post_url)
-            .then(response => {
+            .then((response) => {
                 let data = response.data;
                 this.access_token = data.access_token;
                 this.refresh_token = data.refresh_token;
@@ -54,13 +56,13 @@ class SearchHandler {
                 return true
             })
             .catch(error => {
-                // console.log(error);
+                // console.error(error);
                 return false
             })
         ]);
         if (this.fetch_interval == undefined) {
-            this.fetchstreams();
-            this.fetch_interval = setInterval(this.fetchstreams, 300000);
+            await this.fetchstreams();
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), 300000);
         }
     }
 
@@ -90,7 +92,7 @@ class SearchHandler {
                     },
                     params: search_params
                 })
-                .then(response => {
+                .then((response) => {
                     temp_streams = [...temp_streams, ...response.data.data];
                     paginator = response.data["pagination"]["cursor"];
                     if (response.data["data"].length == 0) {
@@ -98,6 +100,7 @@ class SearchHandler {
                     }
                 })
                 .catch(error => {
+                    // console.error(error);
                     if (error.response.status == 401) {
                         token_valid = false;
                         fetching = false;
@@ -111,7 +114,7 @@ class SearchHandler {
         paginator = "";
         if (!token_valid) {
             console.warn("Our current access_token is invalid requesting new one!");
-            this.get_auth_token("", true);
+            await this.get_auth_token("", true);
         }
 
         let streams_list = [];

@@ -1,10 +1,8 @@
 // https://www.kindacode.com/article/how-to-easily-generate-a-random-string-in-node-js/
-const generateRandomString = (myLength) => {
-    const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-    const randomArray = Array.from({ length: myLength }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
-    const randomString = randomArray.join("");
-    return randomString;
-};
+const crypto = require('crypto');
+function generateRandomString(length) {
+    return crypto.randomBytes(length).toString('hex');
+}
 
 const { promises: fs } = require("fs");
 
@@ -14,6 +12,6 @@ async function checkFileExists(file){
 }
 
 module.exports = {
-    generateRandomString: generateRandomString,
-    checkFileExists: checkFileExists
+    generateRandomString,
+    checkFileExists
 };
