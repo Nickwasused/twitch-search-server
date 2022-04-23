@@ -108,19 +108,17 @@ class SearchHandler {
 
         console.info(`fetched ${temp_streams.length} streams`)
 
-        let test_streams = temp_streams.forEach(stream => {
-            return new Stream(stream);
-        });
-
-        console.log(test_streams);
-
         paginator = "";
         if (!token_valid) {
             console.warn("Our current access_token is invalid requesting new one!");
             this.get_auth_token("", true);
         }
-        
-        this.streams = temp_streams;
+
+        let streams_list = [];
+        temp_streams.forEach(stream => {
+            streams_list.push(new Stream(stream));
+        });
+        this.streams = streams_list;
     }
 }
 
