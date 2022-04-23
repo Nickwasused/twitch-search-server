@@ -9,9 +9,8 @@ app.use(compression());
 
 // auth stuff
 let current_state = "";
-let host = process.env.HOST;
 let client_id = process.env.CLIENT_ID;
-
+let host = process.env.HOST;
 const search = new SearchHandler();
 
 app.use(function(req, res, next) {
@@ -91,7 +90,7 @@ app.get("/code", (request, response) => {
     } else {
         let token_gen = search.get_auth_token(code);
         if (token_gen) {
-            setup_done = true;
+            search.setup_done = true;
         }
         if (code == undefined) {
             response.send({
@@ -106,6 +105,19 @@ app.get("/code", (request, response) => {
     
 });
 
+app.get("/setup", (request, response) => {
+    if (!search.setup_done) {
+        let state = utils.generateRandomString(32);
+        current_state = state;
+        response.redirect(301, `https://id.twitch.tv/oauth2/authorize?response_type=code&scope=&client_id=${client_id}&redirect_uri=${host}/code&state=${state}`);
+    } else {
+        response.type('json');
+        response.send({
+            "status": "done"
+        });
+    }
+});
+
 app.get("/", (request, response) => {
     if (search.setup_done) {
         response.type('json');
@@ -113,9 +125,10 @@ app.get("/", (request, response) => {
             "status": "done"
         });
     } else {
-        let state = utils.generateRandomString(32);
-        current_state = state;
-        response.redirect(301, `https://id.twitch.tv/oauth2/authorize?response_type=code&scope=&client_id=${client_id}&redirect_uri=${host}/code&state=${state}`);
+        response.type('json');
+        response.send({
+            "status": "setup"
+        });
     }
 });
 
