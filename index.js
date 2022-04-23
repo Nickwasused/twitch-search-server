@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require("express");
+const compression = require('compression');
 const app = express();
 const utils = require('./utils');
 const SearchHandler = require('./search');
+
+app.use(compression());
 
 let fetch_interval = undefined;
 
