@@ -98,6 +98,11 @@ class SearchHandler {
                     if (response.data["data"].length == 0) {
                         fetching = false;
                     }
+                    let streams_list = [];
+                    temp_streams.forEach(stream => {
+                        streams_list.push(new Stream(stream));
+                    });
+                    this.streams = streams_list;
                 })
                 .catch(error => {
                     // console.error(error);
@@ -116,12 +121,6 @@ class SearchHandler {
             console.warn("Our current access_token is invalid requesting new one!");
             await this.get_auth_token("", true);
         }
-
-        let streams_list = [];
-        temp_streams.forEach(stream => {
-            streams_list.push(new Stream(stream));
-        });
-        this.streams = streams_list;
     }
 }
 

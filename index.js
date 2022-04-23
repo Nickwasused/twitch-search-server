@@ -21,25 +21,50 @@ app.use(function(req, res, next) {
     next();
 });
 
+const search_params = [
+    "id",
+    "user_id",
+    "user_login",
+    "user_name",
+    "game_id",
+    "game_name",
+    "type",
+    "title",
+    "viewer_count",
+    "started_at",
+    "language",
+    "thumbnail_url",
+    "tag_ids",
+    "is_mature"
+];
+
 app.get("/search", (request, response) => {
     if (search.setup_done) {
         response.type('json');
-        let search_title = request.query.title;
-        let search_viewers = request.query.viewers;
-        let search_game = request.query.game;
-        let search_language = request.query.language;
+        let filters = [];
+        search_params.forEach(param => {
+            if (request.query.hasOwnProperty(param)) {
+                filters.push({
+                   "param": param, 
+                   "value": request.query[param]
+                })
+            }
+        });
+
         let api_response = search.streams.filter((stream) => {
-            let { title, game_id, language, viewer_count } = stream;
-            if (search_title != undefined && !title.toLowerCase().includes(search_title.toLowerCase())) {
-                return null;
-            } else if (search_viewers != undefined && !viewer_count == search_viewers) {
-                return null;
-            } else if (search_game != undefined && !game_id == search_game) {
-                return null;
-            } else if (search_language != undefined && !language == search_language) {
-                return null;
-            } else {
+            let pass = false;
+            filters.forEach(filter => {
+                if (stream[filter.param].toString().toLowerCase().includes(filter.value.toString().toLowerCase()) || stream[filter.param] == filter.value) {
+                    pass = true;
+                } else {
+                    pass = false;
+                    return;
+                }
+            })
+            if (pass) {
                 return stream;
+            } else {
+                return null;
             }
         });
         response.send({
