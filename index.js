@@ -61,14 +61,32 @@ app.get("/search", (request, response) => {
                 }
             })
             if (pass) {
-                return stream;
+                return (stream);
             } else {
                 return null;
             }
         });
+
+        api_response.forEach(stream => {
+            api_response.push(stream);
+        })
+
+        // filter for duplicates
+        // yes they can happen. Why? I don´t know
+        let ids = [];
+        let new_response = [];
+        api_response.forEach(stream => {
+            if (ids.indexOf(stream["id"]) == -1) {
+                new_response.push(stream);
+                ids.push(stream["id"]);
+            } else {
+                return;
+            }
+        })
+
         response.send({
             "status": "done",
-            "data": api_response
+            "data": new_response
         });
     } else {
         response.type('json');
