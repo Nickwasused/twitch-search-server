@@ -53,12 +53,13 @@ app.get("/search", (request, response) => {
         let api_response = search.streams.filter((stream) => {
             let pass = false;
             filters.forEach(filter => {
-                if (stream[filter.param].toString().toLowerCase().includes(filter.value.toString().toLowerCase()) || stream[filter.param] == filter.value) {
-                    pass = true;
-                } else {
-                    pass = false;
-                    return;
-                }
+                let values = filter.value.split(",");
+                values.forEach((value) => {
+                    if (stream[filter.param].toString().toLowerCase().includes(value.toString().toLowerCase()) || stream[filter.param] == value) {
+                        pass = true;
+                        return;
+                    }
+                })
             })
             if (pass) {
                 return (stream);
