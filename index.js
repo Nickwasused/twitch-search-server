@@ -53,16 +53,21 @@ app.get("/search", (request, response) => {
         let api_response = search.streams.filter((stream) => {
             let pass = false;
             filters.forEach(filter => {
+                let local_pass= false;
                 let values = filter.value.split(",");
                 values.forEach((value) => {
                     if (stream[filter.param].toString().toLowerCase().includes(value.toString().toLowerCase()) || stream[filter.param] == value) {
                         pass = true;
-                        return;
+                        local_pass = true;
+                    } else {
+                        if (!local_pass) {
+                            pass = false; 
+                        }
                     }
                 })
             })
             if (pass) {
-                return (stream);
+                return stream;
             } else {
                 return null;
             }
