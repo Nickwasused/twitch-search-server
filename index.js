@@ -14,7 +14,7 @@ let host = process.env.HOST;
 const search = new SearchHandler();
 
 app.use(function(req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'https://luckyv.nickwasused.com');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Cache-Control', 'no-store');
     next();
