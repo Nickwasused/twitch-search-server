@@ -23,8 +23,8 @@ class SearchHandler {
     }
 
     async init() {
-        if (await utils.checkFileExists("./local.json")) {
-            let data = JSON.parse(await fs.readFile('local.json', 'utf8'));
+        if (await utils.checkFileExists("./local/local.json")) {
+            let data = JSON.parse(await fs.readFile('./local/local.json', 'utf8'));
             this.access_token = data["access_token"];
             this.refresh_token = data["refresh_token"];
             if (this.access_token != undefined && this.fetch_interval == undefined) {
