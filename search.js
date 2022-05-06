@@ -12,6 +12,15 @@ let paginator = "";
 let language = process.env.LANGUAGE;
 let game_id = process.env.GAME_ID;
 
+function get_file_path() {
+    const is_fly = process.env.FLY_APP_NAME != undefined;
+    let file_path = "./local/local.json";
+    if (is_fly) {
+        file_path = "/local/local.json"
+    }
+    return file_path;
+}
+
 class SearchHandler {
     constructor() {
         this.setup_done = false;
@@ -23,8 +32,9 @@ class SearchHandler {
     }
 
     async init() {
-        if (await utils.checkFileExists("./local/local.json")) {
-            let data = JSON.parse(await fs.readFile('./local/local.json', 'utf8'));
+        let file_path = get_file_path();
+        if (await utils.checkFileExists(file_path)) {
+            let data = JSON.parse(await fs.readFile(file_path, 'utf8'));
             this.access_token = data["access_token"];
             this.refresh_token = data["refresh_token"];
             if (this.access_token != undefined && this.fetch_interval == undefined) {
@@ -47,7 +57,7 @@ class SearchHandler {
                 let data = response.data;
                 this.access_token = data.access_token;
                 this.refresh_token = data.refresh_token;
-                fs.writeFile('local.json', JSON.stringify({
+                fs.writeFile(get_file_path(), JSON.stringify({
                     "access_token": this.access_token,
                     "refresh_token": this.refresh_token
                 }), 'utf8');
