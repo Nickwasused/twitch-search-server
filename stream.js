@@ -1,4 +1,4 @@
-class Stream {
+export class Stream {
     // receive a Twitch Stream item in JSON format
     constructor(item) {
         this.id = item["id"];
@@ -18,4 +18,6 @@ class Stream {
     }
 }
 
-module.exports = Stream;
+export default {
+    Stream
+}

@@ -1,8 +1,10 @@
-require('dotenv').config();
-const { promises: fs } = require("fs");
-const axios = require('axios');
-const utils = require('./utils');
-const Stream = require('./stream');
+import dotenv from "dotenv";
+import { promises as fs } from "fs"; 
+import axios from 'axios';
+import utils from './utils.js';
+import { Stream } from './stream.js';
+
+dotenv.config()
 
 let client_id = process.env.CLIENT_ID;
 let secret = process.env.SECRET;
@@ -21,7 +23,7 @@ function get_file_path() {
     return file_path;
 }
 
-class SearchHandler {
+export class SearchHandler {
     constructor() {
         this.setup_done = false;
         this.fetch_interval = undefined;
@@ -134,4 +136,6 @@ class SearchHandler {
     }
 }
 
-module.exports = SearchHandler;
+export default {
+    SearchHandler
+}

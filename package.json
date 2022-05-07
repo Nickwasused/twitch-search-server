@@ -22,5 +22,6 @@
   "bugs": {
     "url": "https://github.com/Nickwasused/twitch-search-server/issues"
   },
-  "homepage": "https://github.com/Nickwasused/twitch-search-server#readme"
+  "homepage": "https://github.com/Nickwasused/twitch-search-server#readme",
+  "type": "module"
 }

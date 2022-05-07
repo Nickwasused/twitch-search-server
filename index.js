@@ -1,10 +1,11 @@
-require('dotenv').config();
-const express = require("express");
-const compression = require('compression');
-const app = express();
-const utils = require('./utils');
-const SearchHandler = require('./search');
+import dotenv from "dotenv";
+import express from 'express';
+import compression from 'compression';
+import utils from './utils.js';
+import { SearchHandler } from './search.js';
 
+dotenv.config()
+const app = express();
 app.use(compression());
 
 // auth stuff

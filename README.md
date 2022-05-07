@@ -21,4 +21,4 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 | Instance | User | Language | Game
 | - | - | - | -
-| https://twitch-search-server.fly.dev/ | Nickwasused | DE | 32982 (GTA 5)  
+| https://twitch-search-server.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5)  
