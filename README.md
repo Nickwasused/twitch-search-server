@@ -20,6 +20,6 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # Instances
 
-| Instance | User | Language | Game
-| - | - | - | -
-| https://twitch-search-server.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5)  
+| Instance | User | Language | Game | Uptime |Node Status
+| - | - | - | - | - | -
+| https://twitch-search-server.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge) | ![Status](https://img.shields.io/badge/dynamic/json?label=Status&query=status&url=https%3A%2F%2Ftwitch-search-server.nickwasused.com%2Fsearch?cacheSeconds=3600)
