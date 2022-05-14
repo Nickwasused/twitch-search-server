@@ -4,6 +4,7 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 # setup
 1. Install the node packages by running: ```npm install```.  
 2. Copy the ```.env.example``` file to ```.env``` and edit it.  
+(You should at least filter for a certain language like ```de```, because this program is not build to respect API limits.)  
 3. After that, launch the server with: ```node index.js.```  
   
 # Fly.io
