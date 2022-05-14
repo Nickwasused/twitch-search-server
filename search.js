@@ -13,12 +13,15 @@ let streams_url = "https://api.twitch.tv/helix/streams";
 let paginator = "";
 let language = process.env.LANGUAGE;
 let game_id = process.env.GAME_ID;
-let interval_timer = process.env.INTERVAL;
+let interval_timer = process.env.INTERVAL_IN_MIN;
 
 if (interval_timer == undefined) {
     // 5 minuets should be okay for a fallback, because we can`t know if the User has other projects that require to use the Twitch API.
-    interval_timer = 300000;
+    interval_timer = 5;
 }
+
+// convert minuets to milliseconds
+interval_timer = interval_timer * 60 * 1000;
 
 function get_file_path() {
     const is_fly = process.env.FLY_APP_NAME != undefined;
@@ -52,7 +55,7 @@ export class SearchHandler {
             if (this.access_token != undefined && this.fetch_interval == undefined) {
                 this.setup_done = true;
                 await this.fetchstreams();
-                this.fetch_interval = setInterval(this.fetchstreams.bind(this), 300000);
+                this.fetch_interval = setInterval(this.fetchstreams.bind(this), interval_timer);
             }
         }
     }
@@ -84,7 +87,7 @@ export class SearchHandler {
         ]);
         if (this.fetch_interval == undefined) {
             await this.fetchstreams();
-            this.fetch_interval = setInterval(this.fetchstreams.bind(this), 300000);
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), interval_timer);
         }
     }
 
