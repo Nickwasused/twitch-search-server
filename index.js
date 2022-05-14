@@ -57,14 +57,21 @@ app.get("/search", (request, response) => {
                 let local_pass= false;
                 let values = filter.value.split(",");
                 values.forEach((value) => {
-                    if (stream[filter.param].toString().toLowerCase().includes(value.toString().toLowerCase()) || stream[filter.param] == value) {
-                        pass = true;
-                        local_pass = true;
+                    if (value === '') {
+                        if (!pass) {
+                            pass = false;
+                        }
                     } else {
-                        if (!local_pass) {
-                            pass = false; 
+                        if (stream[filter.param].toString().toLowerCase().includes(value.toString().toLowerCase()) || stream[filter.param] == value) {
+                            pass = true;
+                            local_pass = true;
+                        } else {
+                            if (!local_pass) {
+                                pass = false; 
+                            }
                         }
                     }
+
                 })
             })
             if (pass) {
