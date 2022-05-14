@@ -6,7 +6,9 @@ import { SearchHandler } from './search.js';
 
 dotenv.config()
 const app = express();
+const exporter = express();
 app.use(compression());
+exporter.use(compression());
 
 // auth stuff
 let current_state = "";
@@ -164,13 +166,17 @@ app.get("/", (request, response) => {
     }
 });
 
-app.get("/metrics", (request, response) => {
+exporter.get("/metrics", (request, response) => {
     response.type('text/plain');
     response.send(`# TYPE total_streams gauge
 total_streams ${search.streams.length}
 # TYPE rate_limit_remaining gauge
 rate_limit_remaining ${search.rate_limit_remaining}
     `);
+});
+
+exporter.listen(9210, () => {
+    console.info("Exporter listening on port 9210");
 });
 
 app.listen(3000, () => {

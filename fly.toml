@@ -2,6 +2,10 @@
 
 app = "twitch-search-server"
 
+[metrics]
+  port = 9210
+  path = “/metrics”
+
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -45,7 +49,3 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
-
-[metrics]
-    port = 3000
-    path = “/metrics”
