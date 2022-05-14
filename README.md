@@ -10,10 +10,11 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 # Fly.io
 (Do the setup before!)  
 (You can host this Server on [fly.io](https://fly.io/))  
+  
 4. Use fly.io Environment Variables by running: ```flyctl secrets set SECRET=TWITCH_SECRET CLIENT_ID=TWITCH_CLIENT_ID HOST=https://YOUR_URL_HERE.fly.dev LANGUAGE=LANGUAGE_TO_FILER GAME_ID=32982```  
-5. Run: ```flyctl deploy```  
-6. Now check the Status by running: ```flyctl status```  
-7. Create a volume: ```fly volumes create twitch_search_server --region fra --size 1```
+5. Create a volume: ```fly volumes create YOUR_FLY_APP_NAME --region fra --size 1```
+6. Run: ```flyctl deploy```  
+7. Now check the Status by running: ```flyctl status```  
 8. Visit: ```https://YOU_URL.COM/setup``` and login to twitch.  
 9. The Page should show: ```status  "done"```  
 10. Now you can change code at any time without having to log into twitch again.
