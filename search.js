@@ -9,6 +9,12 @@ dotenv.config()
 let client_id = process.env.CLIENT_ID;
 let secret = process.env.SECRET;
 let host = process.env.HOST;
+
+// select the host automatically on fly.io but respect a overwrite by the HOST key
+if (process.env.FLY_APP_NAME != undefined && process.env.HOST == undefined) {
+    host = `https://${process.env.FLY_APP_NAME}.fly.dev`
+} 
+
 let streams_url = "https://api.twitch.tv/helix/streams";
 let paginator = "";
 let language = process.env.LANGUAGE;
