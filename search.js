@@ -13,6 +13,12 @@ let streams_url = "https://api.twitch.tv/helix/streams";
 let paginator = "";
 let language = process.env.LANGUAGE;
 let game_id = process.env.GAME_ID;
+let interval_timer = process.env.INTERVAL;
+
+if (interval_timer == undefined) {
+    // 5 minuets should be okay for a fallback, because we can`t know if the User has other projects that require to use the Twitch API.
+    interval_timer = 300000;
+}
 
 function get_file_path() {
     const is_fly = process.env.FLY_APP_NAME != undefined;
@@ -30,6 +36,10 @@ export class SearchHandler {
         this.streams = [];
         this.access_token = "";
         this.refresh_token = "";
+        this.first_fetch_done = false;
+        this.rate_limit = 0;
+        this.rate_limit_remaining = 0;
+        this.ratelimit_reset = 0;
         this.init();
     }
 
@@ -92,6 +102,7 @@ export class SearchHandler {
         if (game_id != "" && game_id != undefined) {
             search_params["game_id"] = game_id;
         }
+
         while (fetching) {
             if (paginator != "" && paginator != undefined) {
                 search_params["after"] = paginator;
@@ -105,6 +116,23 @@ export class SearchHandler {
                     params: search_params
                 })
                 .then((response) => {
+                    if (!this.first_fetch_done) {
+                        this.first_fetch_done = true;
+                        this.rate_limit = response.headers["ratelimit-limit"];
+                        this.rate_limit_remaining = response.headers["ratelimit-remaining"];
+                        this.ratelimit_reset = response.headers["ratelimit-reset"];
+                    } else {
+                        this.rate_limit = response.headers["ratelimit-limit"];
+                        this.rate_limit_remaining = response.headers["ratelimit-remaining"];
+                        this.ratelimit_reset = response.headers["ratelimit-reset"];
+                    }
+
+                    if (this.rate_limit_remaining == 0) {
+                        // we can`t hit the API any more so we just end the current request here
+                        // this can happen if we don`t filter e.g. for a certain language
+                        console.warn("API limit hit please check if you set your filters correctly.");
+                        fetching = false;
+                    }
                     temp_streams = [...temp_streams, ...response.data.data];
                     paginator = response.data["pagination"]["cursor"];
                     if (response.data["data"].length == 0) {
@@ -121,6 +149,17 @@ export class SearchHandler {
                     if (error.response.status == 401) {
                         token_valid = false;
                         fetching = false;
+                    } else if (error.response.status == 429) {
+                        // we hit the API limit
+                        let wait_until_unix = error.response.headers["ratelimit-reset"];
+                        let now = Math.floor(new Date().getTime() / 1000);
+                        let diff = wait_until_unix - now;
+                        // lets wait until our Bucket resets
+                        if (diff > 0) {
+                            setTimeout(() => {
+                                fetching = false;
+                            }, diff)
+                        }
                     }
                 })
             ]);
