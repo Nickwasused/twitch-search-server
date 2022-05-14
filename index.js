@@ -164,6 +164,15 @@ app.get("/", (request, response) => {
     }
 });
 
+app.get("/metrics", (request, response) => {
+    response.type('text/plain');
+    response.send(`# TYPE total_streams gauge
+total_streams ${search.streams.length}
+# TYPE rate_limit_remaining gauge
+rate_limit_remaining ${search.rate_limit_remaining}
+    `);
+});
+
 app.listen(3000, () => {
     console.info("server listening on port 3000");
 });
