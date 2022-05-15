@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 import { promises as fs } from "fs"; 
 import axios from 'axios';
 import utils from './utils.js';
-import { Stream } from './stream.js';
+
+axios.defaults.timeout === 1000;
 
 dotenv.config()
 
@@ -101,7 +102,7 @@ export class SearchHandler {
         console.info("fetching streams");
         let fetching = true;
         let token_valid = true;
-        let temp_streams = [];
+        let tempstreams = [];
         let search_params = {
             first: 100
         };
@@ -116,15 +117,19 @@ export class SearchHandler {
             if (paginator != "" && paginator != undefined) {
                 search_params["after"] = paginator;
             }
+
             await Promise.all([
                 axios.get(streams_url, {
                     headers: {
                         "client-id": client_id,
-                        "Authorization": "Bearer " + this.access_token
+                        "Authorization": `Bearer ${this.access_token}`
                     },
                     params: search_params
                 })
                 .then((response) => {
+                    // the rate limit is 800 requests per minuete for the search endpoint
+                    // the limit refills at a constant rate = 1 request per 75ms
+                    // if we dont make more than one request per 75ms then the ratelimit-remaining stays at 799
                     if (!this.first_fetch_done) {
                         this.first_fetch_done = true;
                         this.rate_limit = response.headers["ratelimit-limit"];
@@ -142,16 +147,12 @@ export class SearchHandler {
                         console.warn("API limit hit please check if you set your filters correctly.");
                         fetching = false;
                     }
-                    temp_streams = [...temp_streams, ...response.data.data];
-                    paginator = response.data["pagination"]["cursor"];
-                    if (response.data["data"].length == 0) {
+
+                    tempstreams = [...tempstreams, ...response.data.data];
+                    if (response.data["pagination"]["cursor"] == undefined || response.data["pagination"]["cursor"] == "IA") {
                         fetching = false;
                     }
-                    let streams_list = [];
-                    temp_streams.forEach(stream => {
-                        streams_list.push(new Stream(stream));
-                    });
-                    this.streams = streams_list;
+                    paginator = response.data["pagination"]["cursor"];
                 })
                 .catch(error => {
                     // console.error(error);
@@ -174,7 +175,9 @@ export class SearchHandler {
             ]);
         }
 
-        console.info(`fetched ${temp_streams.length} streams`)
+        this.streams = tempstreams;
+
+        console.info(`fetched ${this.streams.length} streams`)
 
         paginator = "";
         if (!token_valid) {
