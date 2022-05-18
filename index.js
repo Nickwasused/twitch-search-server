@@ -89,6 +89,7 @@ app.get("/search", (request, response) => {
         });
     } else {
         response.type('json');
+        response.status(401);
         response.send({
             "status": "setup"
         });
@@ -101,6 +102,7 @@ app.get("/code", (request, response) => {
     let state = request.query.state;
     if (state != current_state) {
         console.log("wrong state returned");
+        response.status(403);
         response.send({
             "status": "error"
         });
@@ -110,6 +112,7 @@ app.get("/code", (request, response) => {
             search.setup_done = true;
         }
         if (code == undefined) {
+            response.status(500);
             response.send({
                 "status": "error"
             });
@@ -143,6 +146,7 @@ app.get("/", (request, response) => {
         });
     } else {
         response.type('json');
+        response.status(401);
         response.send({
             "status": "setup"
         });
