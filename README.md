@@ -19,6 +19,10 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 9. The Page should show: ```status  "done"```  
 10. Now you can change code at any time without having to log into twitch again.
 
+# API Docs
+
+https://nickwasused.com/twitch-search-server/
+
 # Instances
 
 | Instance | User | Language | Game | Uptime |Node Status
