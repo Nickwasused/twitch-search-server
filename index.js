@@ -3,6 +3,7 @@ import express from 'express';
 import compression from 'compression';
 import utils from './utils.js';
 import { SearchHandler } from './search.js';
+import { Database } from './database.js';
 
 dotenv.config()
 const app = express();
@@ -10,10 +11,15 @@ const exporter = express();
 app.use(compression());
 exporter.use(compression());
 
+const database = new Database(); 
+
+let settings_object = await database.get_settings();
+
 // auth stuff
 let current_state = "";
-let client_id = process.env.CLIENT_ID;
-let host = process.env.HOST;
+let client_id = await database.get_client_id()
+let secret = await database.get_secret();
+let host = settings_object["HOST"];
 const search = new SearchHandler();
 
 app.use(function(req, res, next) {
@@ -166,6 +172,6 @@ exporter.listen(9210, () => {
     console.info("Exporter listening on port 9210");
 });
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
     console.info("server listening on port 3000");
 });

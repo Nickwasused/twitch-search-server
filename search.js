@@ -1,43 +1,16 @@
-import dotenv from "dotenv";
 import { promises as fs } from "fs"; 
+import { Database } from './database.js';
 import axios from 'axios';
-import utils from './utils.js';
 
 axios.defaults.timeout === 1000;
 
-dotenv.config()
-
-let client_id = process.env.CLIENT_ID;
-let secret = process.env.SECRET;
-let host = process.env.HOST;
-
-// select the host automatically on fly.io but respect a overwrite by the HOST key
-if (process.env.FLY_APP_NAME != undefined && process.env.HOST == undefined) {
-    host = `https://${process.env.FLY_APP_NAME}.fly.dev`
-} 
-
 let streams_url = "https://api.twitch.tv/helix/streams";
 let paginator = "";
-let language = process.env.LANGUAGE;
-let game_id = process.env.GAME_ID;
-let interval_timer = process.env.INTERVAL_IN_MIN;
 
-if (interval_timer == undefined) {
-    // 5 minuets should be okay for a fallback, because we can`t know if the User has other projects that require to use the Twitch API.
-    interval_timer = 5;
-}
-
-// convert minuets to milliseconds
-interval_timer = interval_timer * 60 * 1000;
-
-function get_file_path() {
-    const is_fly = process.env.FLY_APP_NAME != undefined;
-    let file_path = "./local/local.json";
-    if (is_fly) {
-        file_path = "/local/local.json"
-    }
-    return file_path;
-}
+const database = new Database();
+const settings_object = await database.get_settings();
+const client_id = await database.get_client_id();
+const secret = await database.get_secret();
 
 export class SearchHandler {
     constructor() {
@@ -50,39 +23,52 @@ export class SearchHandler {
         this.rate_limit = 0;
         this.rate_limit_remaining = 0;
         this.ratelimit_reset = 0;
+        this.language = settings_object["LANGUAGE"];
+        this.game_id = settings_object["GAME_ID"];
+        this.interval_timer = settings_object["INTERVAL_IN_MIN"];
+        this.client_id = client_id;
+        this.secret = secret;
+        this.host = settings_object["HOST"];
+        // convert minuets to milliseconds
+        this.interval_timer = this.interval_timer * 60 * 1000;
         this.init();
     }
 
     async init() {
-        let file_path = get_file_path();
-        if (await utils.checkFileExists(file_path)) {
-            let data = JSON.parse(await fs.readFile(file_path, 'utf8'));
-            this.access_token = data["access_token"];
-            this.refresh_token = data["refresh_token"];
-            if (this.access_token != undefined && this.fetch_interval == undefined) {
-                this.setup_done = true;
-                await this.fetchstreams();
-                this.fetch_interval = setInterval(this.fetchstreams.bind(this), interval_timer);
-            }
+        try {
+            const auth_data = await database.get_auth();
+            this.access_token = auth_data["access_token"];
+            this.refresh_token = auth_data["refresh_token"];
+        } catch {
+            this.access_token = undefined;
+            this.refresh_token = undefined;
+        }
+        
+        database.checkifauthexists();
+
+        if (this.access_token != undefined && this.fetch_interval == undefined && this.access_token != "") {
+            this.setup_done = true;
+            await this.fetchstreams();
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
         }
     }
 
     async get_auth_token(code = "", refresh = false) {
+        console.log(code);
         let token_url = "https://id.twitch.tv/oauth2/token";
-        let post_url = `${token_url}?client_id=${client_id}&client_secret=${secret}&code=${code}&grant_type=authorization_code&redirect_uri=${host}/code`;
+        let post_url = `${token_url}?client_id=${this.client_id}&client_secret=${this.secret}&code=${code}&grant_type=authorization_code&redirect_uri=${this.host}/code`;
         if (refresh) {
-            post_url = `${token_url}?client_id=${client_id}&client_secret=${secret}&refresh_token=${this.refresh_token}&grant_type=refresh_token&redirect_uri=${host}/code`;
+            post_url = `${token_url}?client_id=${this.client_id}&client_secret=${this.secret}&refresh_token=${this.refresh_token}&grant_type=refresh_token&redirect_uri=${this.host}/code`;
         }
+        console.log(post_url);
         await Promise.all([
             axios.post(post_url)
             .then((response) => {
                 let data = response.data;
+                console.log(data);
                 this.access_token = data.access_token;
                 this.refresh_token = data.refresh_token;
-                fs.writeFile(get_file_path(), JSON.stringify({
-                    "access_token": this.access_token,
-                    "refresh_token": this.refresh_token
-                }), 'utf8');
+                database.set_auth(this.access_token, this.refresh_token);
                 clearInterval(this.fetch_interval);
                 this.fetch_interval = undefined;
                 return true
@@ -94,7 +80,7 @@ export class SearchHandler {
         ]);
         if (this.fetch_interval == undefined) {
             await this.fetchstreams();
-            this.fetch_interval = setInterval(this.fetchstreams.bind(this), interval_timer);
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
         }
     }
 
@@ -106,11 +92,11 @@ export class SearchHandler {
         let search_params = {
             first: 100
         };
-        if (language != "" && language != undefined) {
-            search_params["language"] = language;
+        if (this.language != "" && this.language != undefined) {
+            search_params["language"] = this.language;
         }
-        if (game_id != "" && game_id != undefined) {
-            search_params["game_id"] = game_id;
+        if (this.game_id != "" && this.game_id != undefined) {
+            search_params["game_id"] = this.game_id;
         }
 
         while (fetching) {
@@ -121,7 +107,7 @@ export class SearchHandler {
             await Promise.all([
                 axios.get(streams_url, {
                     headers: {
-                        "client-id": client_id,
+                        "client-id": this.client_id,
                         "Authorization": `Bearer ${this.access_token}`
                     },
                     params: search_params
