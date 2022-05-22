@@ -1,145 +1,154 @@
-swagger: "2.0"
+openapi: 3.0.0
 info:
-  description: "This is a API for the Twitch-Search-Server (https://github.com/Nickwasused/twitch-search-server)."
-  version: "1.0.0"
-  title: "twitch-search-server"
+  description: This is a API for the Twitch-Search-Server
+    (https://github.com/Nickwasused/twitch-search-server).
+  version: 1.0.0
+  title: twitch-search-server
   termsOfService: ""
   contact:
-    email: "contact.nickwasused.fa6c8@simplelogin.co"
+    email: contact.nickwasused.fa6c8@simplelogin.co
   license:
-    name: "Mozilla Public License 2.0"
-    url: "https://github.com/Nickwasused/twitch-search-server/blob/main/LICENSE"
-host: "twitch-search-server.nickwasused.com"
-basePath: "/"
-schemes:
-- "https"
+    name: Mozilla Public License 2.0
+    url: https://github.com/Nickwasused/twitch-search-server/blob/main/LICENSE
 paths:
   /search:
     get:
-      summary: "Search for Streams"
-      description: "Multiple search parameters can be provided."
-      operationId: "search"
-      produces:
-      - "application/json"
+      summary: Search for Streams
+      description: Multiple search parameters can be provided.
+      operationId: search
       parameters:
-      - name: "id"
-        in: "query"
-        description: "Stream ID"
-        required: false
-        type: "integer"
-      - name: "user_id"
-        in: "query"
-        description: "ID of the user who is streaming."
-        required: false
-        type: "integer"
-      - name: "user_login"
-        in: "query"
-        description: "Login of the user who is streaming."
-        required: false
-        type: "string"
-      - name: "user_name"
-        in: "query"
-        description: "Display name corresponding to user_id."
-        required: false
-        type: "string"
-      - name: "game_id"
-        in: "query"
-        description: "ID of the game being played on the stream."
-        required: false
-        type: "integer"
-      - name: "game_name"
-        in: "query"
-        description: "Name of the game being played."
-        required: false
-        type: "string"
-      - name: "type"
-        in: "query"
-        description: "Stream type: \"live\" or \"\" (in case of error)."
-        required: false
-        type: "string"
-      - name: "title"
-        in: "query"
-        description: "Stream title."
-        required: false
-        type: "string"
-      - name: "started_at"
-        in: "query"
-        description: "UTC timestamp."
-        required: false
-        type: "integer"
-      - name: "language"
-        in: "query"
-        description: "Stream language. A language value is either the ISO 639-1 two-letter code for a supported stream language or “other”."
-        required: false
-        type: "integer"
-      - name: "thumbnail_url"
-        in: "query"
-        description: "Thumbnail URL of the stream. All image URLs have variable width and height. You can replace {width} and {height} with any values to get that size image"
-        required: false
-        type: "integer"
-      - name: "tag_ids"
-        in: "query"
-        items:
-          type: "integer"
-        description: "Shows tag IDs that apply to the stream."
-        required: false
-        type: "array"
-      - name: "is_mature"
-        in: "query"
-        description: "Indicates if the broadcaster has specified their channel contains mature content that may be inappropriate for younger audiences."
-        required: false
-        type: "integer"
+        - name: id
+          in: query
+          description: Stream ID
+          required: false
+          schema:
+            type: integer
+        - name: user_id
+          in: query
+          description: ID of the user who is streaming.
+          required: false
+          schema:
+            type: integer
+        - name: user_login
+          in: query
+          description: Login of the user who is streaming.
+          required: false
+          schema:
+            type: string
+        - name: user_name
+          in: query
+          description: Display name corresponding to user_id.
+          required: false
+          schema:
+            type: string
+        - name: game_id
+          in: query
+          description: ID of the game being played on the stream.
+          required: false
+          schema:
+            type: integer
+        - name: game_name
+          in: query
+          description: Name of the game being played.
+          required: false
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: 'Stream type: "live" or "" (in case of error).'
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: Stream title.
+          required: false
+          schema:
+            type: string
+        - name: started_at
+          in: query
+          description: UTC timestamp.
+          required: false
+          schema:
+            type: integer
+        - name: language
+          in: query
+          description: Stream language. A language value is either the ISO 639-1 two-letter
+            code for a supported stream language or “other”.
+          required: false
+          schema:
+            type: integer
+        - name: thumbnail_url
+          in: query
+          description: Thumbnail URL of the stream. All image URLs have variable width and
+            height. You can replace {width} and {height} with any values to get
+            that size image
+          required: false
+          schema:
+            type: integer
+        - name: tag_ids
+          in: query
+          description: Shows tag IDs that apply to the stream.
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: is_mature
+          in: query
+          description: Indicates if the broadcaster has specified their channel contains
+            mature content that may be inappropriate for younger audiences.
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
-          description: "api responded"
+          description: api responded
         "401":
-          description: "setup required"
+          description: setup required
   /code:
     get:
-      summary: "Twitch auth"
-      description: "You get redirected here during the setup."
-      operationId: "code"
-      produces:
-      - "application/json"
+      summary: Twitch auth
+      description: You get redirected here during the setup.
+      operationId: code
       parameters:
-      - name: "code"
-        in: "query"
-        description: "Twitch Auth Code"
-        required: false
-        type: "integer"
-      - name: "state"
-        in: "query"
-        description: "State generated by the API."
-        required: false
-        type: "string"
+        - name: code
+          in: query
+          description: Twitch Auth Code
+          required: false
+          schema:
+            type: integer
+        - name: state
+          in: query
+          description: State generated by the API.
+          required: false
+          schema:
+            type: string
       responses:
         "200":
-          description: "code and state accepted"
+          description: code and state accepted
         "403":
-          description: "wrong state returned"
+          description: wrong state returned
         "500":
-          description: "wrong/no code send"
-          
+          description: wrong/no code send
   /setup:
     get:
-      summary: "API Setup"
-      description: "This is required to get the Server up and running."
-      operationId: "setup"
-      produces:
-      - "application/json"
+      summary: API Setup
+      description: This is required to get the Server up and running.
+      operationId: setup
       responses:
         "200":
-          description: "the setup is already completed"
+          description: the setup is already completed
         "301":
-          description: "redirect to Twitch login after that you get redirected to /code"
-
+          description: redirect to Twitch login after that you get redirected to /code
   /metrics:
     get:
-      summary: "Prometheus Metrics"
-      description: "Not that this is running on another Port (9210) and not on 3000."
-      operationId: "setup"
-      produces:
-      - "text/plain"
+      summary: Prometheus Metrics
+      description: Not that this is running on another Port (9210) and not on 3000.
+      operationId: metrics
       responses:
         "200":
-          description: "you got metrics"
+          description: you got metrics
+servers:
+  - url: https://twitch-search-server.nickwasused.com/
+  - url: https://twitch-search-server-en.nickwasused.com/
