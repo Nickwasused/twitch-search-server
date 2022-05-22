@@ -9,6 +9,7 @@ let paginator = "";
 
 const database = new Database();
 const settings_object = await database.get_settings();
+console.log(settings_object);
 const client_id = await database.get_client_id();
 const secret = await database.get_secret();
 
