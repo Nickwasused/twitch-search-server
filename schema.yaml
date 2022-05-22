@@ -102,10 +102,19 @@ paths:
           schema:
             type: integer
       responses:
-        "200":
-          description: api responded
+        '200':
+            description: Response Object
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
         "401":
           description: setup required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResponse'
+                
   /code:
     get:
       summary: Twitch auth
@@ -127,10 +136,23 @@ paths:
       responses:
         "200":
           description: code and state accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResponse'
         "403":
           description: wrong state returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResponse'
         "500":
           description: wrong/no code send
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResponse'
+          
   /setup:
     get:
       summary: API Setup
@@ -138,9 +160,14 @@ paths:
       operationId: setup
       responses:
         "200":
-          description: the setup is already completed
+          description: the setup is completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResponse'
         "301":
           description: redirect to Twitch login after that you get redirected to /code
+          
   /metrics:
     get:
       summary: Prometheus Metrics
@@ -149,6 +176,76 @@ paths:
       responses:
         "200":
           description: you got metrics
+
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        status:
+          type: string
+          description: done, setup, error
+        data:
+          $ref: '#/components/schemas/StreamerList'
+          
+    SimpleResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: done, setup, error
+            
+          
+    StreamerList:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: Stream ID
+          user_id:
+            type: string
+            description: ID of the user who is streaming.
+          user_login:
+            type: string
+            description: Login of the user who is streaming.
+          user_name:
+            type: string
+            description: Display name corresponding to user_id.
+          game_id:
+            type: string
+            description: ID of the game being played on the stream.
+          game_name:
+            type: string
+            description: Name of the game being played.
+          type:
+            type: string
+            description: 'Stream type: "live" or "" (in case of error).'
+          title:
+            type: string
+            description: Stream title.
+          viewer_count:
+            type: integer
+            description: The current viewer count of the stream
+          started_at:
+            type: string
+            description: UTC timestamp.
+          language:
+            type: string
+            description: Stream language. A language value is either the ISO 639-1 two-letter code for a supported stream language or “other”.
+          thumbnail_url:
+            type: string
+            description: Thumbnail URL of the stream. All image URLs have variable width and height. You can replace {width} and {height} with any values to get
+          tag_ids:
+            type: array
+            description: Shows tag IDs that apply to the stream.
+            items:
+              type: integer
+          is_mature:
+            type: boolean
+            description: Indicates if the broadcaster has specified their channel contains mature content that may be inappropriate for younger audiences.
+
 servers:
   - url: https://twitch-search-server.nickwasused.com/
   - url: https://twitch-search-server-en.nickwasused.com/
