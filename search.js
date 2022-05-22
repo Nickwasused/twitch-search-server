@@ -9,7 +9,6 @@ let paginator = "";
 
 const database = new Database();
 const settings_object = await database.get_settings();
-console.log(settings_object);
 const client_id = await database.get_client_id();
 const secret = await database.get_secret();
 
@@ -55,7 +54,6 @@ export class SearchHandler {
     }
 
     async get_auth_token(code = "", refresh = false) {
-        console.log(code);
         let token_url = "https://id.twitch.tv/oauth2/token";
         let post_url = `${token_url}?client_id=${this.client_id}&client_secret=${this.secret}&code=${code}&grant_type=authorization_code&redirect_uri=${this.host}/code`;
         if (refresh) {
