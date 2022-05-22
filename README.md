@@ -42,6 +42,9 @@ Database: "twitch-search-server"
 9. The Page should show: ```status  "done"```  
 10. Now you can change code at any time without having to log into twitch again.
 
+# Railway.app
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/sAmxi6)  
+
 # API Docs
 
 https://nickwasused.com/twitch-search-server/
