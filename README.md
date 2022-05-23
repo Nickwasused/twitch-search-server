@@ -47,7 +47,9 @@ Database: "twitch-search-server"
 
 # API Docs
 
-https://nickwasused.com/twitch-search-server/
+[https://nickwasused.com/twitch-search-server/](https://twitch-search-server-docs.nickwasused.com/)
+
+[https://nickwasused.github.io/twitch-search-server/](https://nickwasused.github.io/twitch-search-server/)
 
 # Instances
 
