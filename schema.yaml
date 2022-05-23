@@ -245,7 +245,11 @@ components:
           is_mature:
             type: boolean
             description: Indicates if the broadcaster has specified their channel contains mature content that may be inappropriate for younger audiences.
+          
+              
 
 servers:
   - url: https://twitch-search-server.nickwasused.com/
+    description: "[DE][GTA5]"
   - url: https://twitch-search-server-en.nickwasused.com/
+    description: "[EN][GTA5]"
