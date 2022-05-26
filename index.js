@@ -17,7 +17,6 @@ const search = new SearchHandler();
 
 // auth stuff
 let settings_object = await database.get_settings();
-let current_state = "";
 let client_id = await database.get_client_id()
 let host = settings_object["HOST"];
 
@@ -119,7 +118,7 @@ app.get("/code", (request, response) => {
     response.type('json');
     let code = request.query.code;
     let state = request.query.state;
-    if (state != current_state) {
+    if (state != cache.take(`state:${request.ip}`)) {
         console.log("wrong state returned");
         response.status(403);
         response.send({
@@ -147,7 +146,8 @@ app.get("/code", (request, response) => {
 app.get("/setup", (request, response) => {
     if (!search.setup_done) {
         let state = utils.generateRandomString(32);
-        current_state = state;
+        cache.set(`state:${request.ip}`, state);
+        cache.ttl(`state:${request.ip}`, 300);
         response.redirect(301, `https://id.twitch.tv/oauth2/authorize?response_type=code&scope=&client_id=${client_id}&redirect_uri=${host}/code&state=${state}`);
     } else {
         response.type('json');
