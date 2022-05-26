@@ -1,8 +1,11 @@
 import express from 'express';
 import compression from 'compression';
+import NodeCache from 'node-cache';
 import utils from './utils.js';
 import { SearchHandler } from './search.js';
 import { Database } from './database.js';
+
+const cache = new NodeCache({ stdTTL: 30 });
 
 const app = express();
 const exporter = express();
@@ -24,6 +27,18 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Cache-Control', 'no-store');
     next();
+});
+
+app.use(function(req, res, next) {
+    try {
+        const cache_id = JSON.stringify(req.query);
+        if (cache.has(cache_id)) {
+            return res.status(200).json(cache.get(cache_id));
+        }
+        return next();
+    } catch (err) {
+        throw new Error(err);
+    }
 });
 
 const search_params = [
@@ -86,6 +101,7 @@ app.get("/search", (request, response) => {
             }
         });
 
+        cache.set(JSON.stringify(request.query), api_response);
         response.send({
             "status": "done",
             "data": api_response
