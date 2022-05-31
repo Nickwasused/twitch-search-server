@@ -34,18 +34,10 @@ export class SearchHandler {
     }
 
     async init() {
-        try {
+        if (database.checkifauthexists()) {
             const auth_data = await database.get_auth();
             this.access_token = auth_data["access_token"];
             this.refresh_token = auth_data["refresh_token"];
-        } catch {
-            this.access_token = undefined;
-            this.refresh_token = undefined;
-        }
-        
-        database.checkifauthexists();
-
-        if (this.access_token != undefined && this.fetch_interval == undefined && this.access_token != "") {
             this.setup_done = true;
             await this.fetchstreams();
             this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
@@ -58,12 +50,10 @@ export class SearchHandler {
         if (refresh) {
             post_url = `${token_url}?client_id=${this.client_id}&client_secret=${this.secret}&refresh_token=${this.refresh_token}&grant_type=refresh_token&redirect_uri=${this.host}/code`;
         }
-        console.log(post_url);
         await Promise.all([
             axios.post(post_url)
             .then((response) => {
                 let data = response.data;
-                console.log(data);
                 this.access_token = data.access_token;
                 this.refresh_token = data.refresh_token;
                 database.set_auth(this.access_token, this.refresh_token);
@@ -98,7 +88,7 @@ export class SearchHandler {
         }
 
         while (fetching) {
-            if (paginator != "" && paginator != undefined) {
+            if (paginator != undefined && paginator != "") {
                 search_params["after"] = paginator;
             }
 
@@ -111,6 +101,9 @@ export class SearchHandler {
                     params: search_params
                 })
                 .then((response) => {
+                    if (response == undefined || response == null) {
+                        fetching = false;
+                    }
                     // the rate limit is 800 requests per minuete for the search endpoint
                     // the limit refills at a constant rate = 1 request per 75ms
                     // if we dont make more than one request per 75ms then the ratelimit-remaining stays at 799
@@ -161,7 +154,7 @@ export class SearchHandler {
 
         this.streams = tempstreams;
 
-        console.info(`fetched ${this.streams.length} streams`)
+        console.info(`fetched ${this.streams.length} streams`);
 
         paginator = "";
         if (!token_valid) {

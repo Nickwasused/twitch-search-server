@@ -17,12 +17,22 @@ export class Database {
 
     async get_client_id() {
         let id = await this.twitch.findOne({});
-        return id["CLIENT_ID"];
+        if (id == undefined || id == null) {
+            console.error("There is no client_id configured for this host.");
+            process.exit(1);
+        } else {
+            return id["CLIENT_ID"];
+        }
     }
     
     async get_secret() {
         let secret = await this.twitch.findOne({});
-        return secret["SECRET"];
+        if (secret == undefined || secret == null) {
+            console.error("There is no secret configured for this host.");
+            process.exit(1);
+        } else {
+            return secret["SECRET"];
+        }
     }
     
     async get_settings() {
@@ -33,7 +43,13 @@ export class Database {
         { projection: {
             _id: 0
         }});
-        return data
+        if (data == undefined || data == null) {
+            console.error("There is no settings configured for this host.");
+            process.exit(1);
+        } else {
+            return data;
+        }
+        
     }
 
     async get_auth() {
@@ -44,7 +60,13 @@ export class Database {
         { projection: {
             _id: 0
         }});
-        return data
+        if (data == undefined || data == null) {
+            console.error("There is no auth configured for this host.");
+            process.exit(1);
+        } else {
+            return data;
+        }
+        
     }
 
     async checkifauthexists() {
