@@ -6,13 +6,19 @@ dotenv.config()
 const our_id = parseInt(process.env.ID);
 
 export class Database {
-    constructor() {
-        this.client = new MongoClient(process.env.MONGO_URL);
-        this.client.connect();
-        this.database = this.client.db("twitch-search-server");
-        this.settings = this.database.collection("settings");
-        this.twitch = this.database.collection("twitch");
-        this.auth = this.database.collection("auth");
+    constructor() {}
+
+    async init(collection) {
+        try {
+            this.client = new MongoClient(process.env.MONGO_URL);
+            this.connect();
+            await this.client.db("twitch-search-server").command({ ping: 1 });
+        } finally {
+            this.database = this.client.db("twitch-search-server");
+            this.settings = this.database.collection("settings");
+            this.twitch = this.database.collection("twitch");
+            this.auth = this.database.collection("auth");
+        }
     }
 
     async get_client_id() {
@@ -102,5 +108,13 @@ export class Database {
                 time: timestamp
             })
         }
+    }
+
+    async connect() {
+        await this.client.connect();
+    }
+
+    async close() {
+        await this.client.close();
     }
 }

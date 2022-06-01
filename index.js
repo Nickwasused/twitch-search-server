@@ -12,12 +12,15 @@ const exporter = express();
 app.use(compression());
 exporter.use(compression());
 
-const database = new Database(); 
+const database = new Database();
+await database.init();
 const search = new SearchHandler();
+await search.init();
 
 // auth stuff
 let settings_object = await database.get_settings();
 let client_id = await database.get_client_id()
+await database.close();
 let host = settings_object["HOST"];
 
 

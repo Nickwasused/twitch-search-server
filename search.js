@@ -6,13 +6,13 @@ axios.defaults.timeout === 1000;
 let streams_url = "https://api.twitch.tv/helix/streams";
 let paginator = "";
 
-const database = new Database();
-const settings_object = await database.get_settings();
-const client_id = await database.get_client_id();
-const secret = await database.get_secret();
-
 export class SearchHandler {
-    constructor() {
+    constructor() {}
+
+    async init() {
+        this.database = new Database();
+        await this.database.init();
+        this.settings_object = await this.database.get_settings();
         this.setup_done = false;
         this.fetch_interval = undefined;
         this.streams = [];
@@ -22,26 +22,24 @@ export class SearchHandler {
         this.rate_limit = 0;
         this.rate_limit_remaining = 0;
         this.ratelimit_reset = 0;
-        this.language = settings_object["LANGUAGE"];
-        this.game_id = settings_object["GAME_ID"];
-        this.interval_timer = settings_object["INTERVAL_IN_MIN"];
-        this.client_id = client_id;
-        this.secret = secret;
-        this.host = settings_object["HOST"];
+        this.language = this.settings_object["LANGUAGE"];
+        this.game_id = this.settings_object["GAME_ID"];
+        this.interval_timer = this.settings_object["INTERVAL_IN_MIN"];
+        this.client_id = await this.database.get_client_id();
+        this.secret = await this.database.get_secret();
+        this.host = this.settings_object["HOST"];
         // convert minuets to milliseconds
         this.interval_timer = this.interval_timer * 60 * 1000;
-        this.init();
-    }
 
-    async init() {
-        if (database.checkifauthexists()) {
-            const auth_data = await database.get_auth();
+        if (await this.database.checkifauthexists()) {
+            const auth_data = await this.database.get_auth();
             this.access_token = auth_data["access_token"];
             this.refresh_token = auth_data["refresh_token"];
             this.setup_done = true;
             await this.fetchstreams();
             this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
         }
+        await this.database.close();
     }
 
     async get_auth_token(code = "", refresh = false) {
@@ -56,7 +54,10 @@ export class SearchHandler {
                 let data = response.data;
                 this.access_token = data.access_token;
                 this.refresh_token = data.refresh_token;
-                database.set_auth(this.access_token, this.refresh_token);
+                this.database.connect();
+                this.database.set_auth(this.access_token, this.refresh_token).finally(() => {
+                    this.database.close();
+                });
                 clearInterval(this.fetch_interval);
                 this.fetch_interval = undefined;
                 return true
