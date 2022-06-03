@@ -1,6 +1,4 @@
-# fly.toml file generated for twitch-search-server on 2022-04-23T13:32:22+02:00
-
-app = "twitch-search-server"
+app = "twitch-search-server-en"
 
 [metrics]
   port = 9210
