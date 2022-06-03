@@ -35,7 +35,10 @@ app.use(function(req, res, next) {
     try {
         const cache_id = JSON.stringify(req.query);
         if (cache.has(cache_id)) {
-            return res.status(200).json(cache.get(cache_id));
+            return res.status(200).json({
+                "status": "done",
+                "data": cache.get(cache_id)
+            });
         }
         return next();
     } catch (err) {
