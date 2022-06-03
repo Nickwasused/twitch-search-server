@@ -8,12 +8,14 @@ const our_id = parseInt(process.env.ID);
 export class Database {
     constructor() {}
 
-    async init(collection) {
+    async init() {
         try {
             this.client = new MongoClient(process.env.MONGO_URL);
-            this.connect();
+            await this.connect();
             await this.client.db("twitch-search-server").command({ ping: 1 });
-        } finally {
+        } catch (e) {
+            console.log(e);
+        }finally {
             this.database = this.client.db("twitch-search-server");
             this.settings = this.database.collection("settings");
             this.twitch = this.database.collection("twitch");
