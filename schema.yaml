@@ -114,6 +114,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SimpleResponse'
+
+  /tags:
+    get:
+      summary: Get all Twitch Tags
+      description: Get all Twitch Tags
+      operationId: tags
+      
+      responses:
+        '200':
+            description: Response Object
                 
   /code:
     get:
