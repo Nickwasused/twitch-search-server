@@ -16,6 +16,7 @@ export class SearchHandler {
         this.setup_done = false;
         this.fetch_interval = undefined;
         this.streams = [];
+        this.tags = {};
         this.access_token = "";
         this.refresh_token = "";
         this.first_fetch_done = false;
@@ -24,20 +25,24 @@ export class SearchHandler {
         this.ratelimit_reset = 0;
         this.language = this.settings_object["LANGUAGE"];
         this.game_id = this.settings_object["GAME_ID"];
-        this.interval_timer = this.settings_object["INTERVAL_IN_MIN"];
+        this.interval_timer_streams = this.settings_object["INTERVAL_IN_MIN"];
         this.client_id = await this.database.get_client_id();
         this.secret = await this.database.get_secret();
         this.host = this.settings_object["HOST"];
         // convert minuets to milliseconds
-        this.interval_timer = this.interval_timer * 60 * 1000;
+        this.interval_timer_streams = this.interval_timer_streams * 60 * 1000;
+        // 24 hours
+        this.interval_timer_tags = 1440 * 60 * 1000;
 
         if (await this.database.checkifauthexists()) {
             const auth_data = await this.database.get_auth();
             this.access_token = auth_data["access_token"];
             this.refresh_token = auth_data["refresh_token"];
             this.setup_done = true;
+            await this.get_all_tags();
             await this.fetchstreams();
-            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer_streams);
+            this.tags_fetch_interval = setInterval(this.get_all_tags.bind(this), this.interval_timer_tags);
         }
         await this.database.close();
     }
@@ -69,8 +74,89 @@ export class SearchHandler {
         ]);
         if (this.fetch_interval == undefined) {
             await this.fetchstreams();
-            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer);
+            this.fetch_interval = setInterval(this.fetchstreams.bind(this), this.interval_timer_streams);
         }
+    }
+
+    async get_all_tags() {
+        const tags_url = "https://api.twitch.tv/helix/tags/streams";
+        let temptags = {};
+        let fetching = true;
+        let token_valid = true;
+        let search_params = {
+            first: 100
+        };
+
+        while (fetching) {
+            if (paginator != undefined && paginator != "") {
+                search_params["after"] = paginator;
+            }
+
+            await Promise.all([
+                axios.get(tags_url, {
+                    headers: {
+                        "client-id": this.client_id,
+                        "Authorization": `Bearer ${this.access_token}`
+                    },
+                    params: search_params
+                })
+                .then((response) => {
+                    if (response == undefined || response == null) {
+                        fetching = false;
+                    }
+                    // the rate limit is 800 requests per minuete for the search endpoint
+                    // the limit refills at a constant rate = 1 request per 75ms
+                    // if we dont make more than one request per 75ms then the ratelimit-remaining stays at 799
+                    if (!this.first_fetch_done) {
+                        this.first_fetch_done = true;
+                        this.rate_limit = response.headers["ratelimit-limit"];
+                        this.rate_limit_remaining = response.headers["ratelimit-remaining"];
+                        this.ratelimit_reset = response.headers["ratelimit-reset"];
+                    } else {
+                        this.rate_limit = response.headers["ratelimit-limit"];
+                        this.rate_limit_remaining = response.headers["ratelimit-remaining"];
+                        this.ratelimit_reset = response.headers["ratelimit-reset"];
+                    }
+
+                    if (this.rate_limit_remaining == 0) {
+                        // we can`t hit the API any more so we just end the current request here
+                        // this can happen if we don`t filter e.g. for a certain language
+                        console.warn("API limit hit while fetching tags.");
+                        fetching = false;
+                    }
+
+                    response.data.data.forEach(tags_element => {
+                        temptags[tags_element["tag_id"]] = tags_element["localization_names"];
+                    });
+
+                    if (response.data["pagination"]["cursor"] == undefined || response.data["pagination"]["cursor"] == "IA") {
+                        fetching = false;
+                    }
+                    paginator = response.data["pagination"]["cursor"];
+                })
+                .catch(error => {
+                    // console.error(error);
+                    if (error.response.status == 401) {
+                        token_valid = false;
+                        fetching = false;
+                    } else if (error.response.status == 429) {
+                        // we hit the API limit
+                        let wait_until_unix = error.response.headers["ratelimit-reset"];
+                        let now = Math.floor(new Date().getTime() / 1000);
+                        let diff = wait_until_unix - now;
+                        // lets wait until our Bucket resets
+                        if (diff > 0) {
+                            setTimeout(() => {
+                                fetching = false;
+                            }, diff)
+                        }
+                    }
+                })
+            ]);
+        }
+        
+        console.info(`fetched ${Object.keys(temptags).length} tags`);
+        this.tags = temptags;
     }
 
     async fetchstreams() {
@@ -127,6 +213,7 @@ export class SearchHandler {
                     }
 
                     tempstreams = [...tempstreams, ...response.data.data];
+
                     if (response.data["pagination"]["cursor"] == undefined || response.data["pagination"]["cursor"] == "IA") {
                         fetching = false;
                     }
