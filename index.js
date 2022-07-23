@@ -120,26 +120,6 @@ app.get("/search", (request, response) => {
     }
 });
 
-app.get("/tags", (request, response) => {
-    if (search.setup_done) {
-        response.type('json');
-
-        let api_response = search.tags;
-
-        cache.set(JSON.stringify(request.query), api_response);
-        response.send({
-            "status": "done",
-            "data": api_response
-        });
-    } else {
-        response.type('json');
-        response.status(401);
-        response.send({
-            "status": "setup"
-        });
-    }
-});
-
 app.get("/code", (request, response) => {
     response.type('json');
     let code = request.query.code;
