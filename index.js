@@ -15,9 +15,9 @@ app.use(express.json({ limit: '10kb' })); // Body limit is 10
 exporter.use(compression());
 
 // rate limit
-// 120 requests per minute for a single user
+// 30 requests per minute for a single user
 const limit = rateLimit({
-    max: 120,
+    max: 30,
     windowMs: 1 * 60 * 1000, // 1 minute
     message: {
         "status": "rate limit hit"
