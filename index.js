@@ -1,6 +1,7 @@
 import express from 'express';
 import compression from 'compression';
 import NodeCache from 'node-cache';
+import rateLimit from 'express-rate-limit';
 import utils from './utils.js';
 import { SearchHandler } from './search.js';
 import { Database } from './database.js';
@@ -10,7 +11,19 @@ const cache = new NodeCache({ stdTTL: 30 });
 const app = express();
 const exporter = express();
 app.use(compression());
+app.use(express.json({ limit: '10kb' })); // Body limit is 10
 exporter.use(compression());
+
+// rate limit
+// 120 requests per minute for a single user
+const limit = rateLimit({
+    max: 120,
+    windowMs: 1 * 60 * 1000, // 1 minute
+    message: {
+        "status": "rate limit hit"
+    }
+});
+app.use('/search', limit);
 
 const database = new Database();
 await database.init();
