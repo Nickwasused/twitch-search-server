@@ -120,6 +120,7 @@ app.get("/search", (request, response) => {
         });
 
         cache.set(JSON.stringify(request.query), api_response);
+        response.setHeader('Cache-Control', 'public, max-age=60');
         response.send({
             "status": "done",
             "data": api_response
