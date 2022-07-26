@@ -2,8 +2,12 @@ import { serve } from "https://deno.land/std@0.149.0/http/server.ts";
 import { config } from "https://deno.land/std@0.149.0/dotenv/mod.ts";
 
 const server_config = await config();
+console.log(server_config);
 let token = await get_auth();
-let streams = [];
+if (token == undefined) {
+    Deno.exit(1);
+}
+let streams = <any[]>[];
 
 async function get_auth() {
     const token_url = "https://id.twitch.tv/oauth2/token";
@@ -19,7 +23,7 @@ async function get_auth() {
     })
     if (api_response.status == 200) {
         let token = await api_response.json();
-        console.log(token)
+        console.info("got a access token")
         return token["access_token"]
     } else {
         console.warn("couldn`t get token")
@@ -30,7 +34,7 @@ async function get_auth() {
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
     let fetching = true;
-    let tempstreams = [];
+    let tempstreams = <any[]>[];
     let paginator = "";
 
     while (fetching) {
@@ -90,8 +94,8 @@ const search_params = [
 function handler(req: Request): Response {
     const request = req;
     const params = new URL(request.url).searchParams;
-
-    let filters = [];
+    
+    let filters = <any[]>[];
     search_params.forEach(param => {
         if (params.has(param)) {
             filters.push({
@@ -105,7 +109,7 @@ function handler(req: Request): Response {
         let pass = false;
         filters.forEach(filter => {
             let local_pass= false;
-            let values = filter.value.split(",");
+            let values = <string[]>filter.value.split(",");
             values.forEach((value) => {
                 if (value === '') {
                     if (!pass) {
@@ -154,4 +158,4 @@ function handler(req: Request): Response {
     
 }
 
-serve(handler, { port: 3000 });
+serve(handler);
