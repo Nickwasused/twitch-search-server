@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.149.0/http/server.ts";
-import { config } from "https://deno.land/std@0.149.0/dotenv/mod.ts";
 
-const server_config = await config();
 let token = await get_auth();
 if (token == undefined) {
     Deno.exit(1);
@@ -15,8 +13,8 @@ async function get_auth() {
         method: "POST",
         headers: headers,
         body: JSON.stringify({
-            "client_id": server_config["CLIENT_ID"],
-            "client_secret": server_config["CLIENT_SECRET"],
+            "client_id": Deno.env.get("CLIENT_ID"),
+            "client_secret": Deno.env.get("CLIENT_SECRET"),
             "grant_type": "client_credentials"
         })
     })
@@ -39,11 +37,11 @@ async function get_streams() {
     while (fetching) {
         let headers = new Headers({
             "content-type": "application/json",
-            "client-id": server_config["CLIENT_ID"],
+            "client-id": Deno.env.get("CLIENT_ID"),
             "Authorization": `Bearer ${token}`
         })
 
-        let url = `${streams_url}?first=100&language=${server_config["LANG"]}&game_id=${server_config["GAME_ID"]}`;
+        let url = `${streams_url}?first=100&language=${Deno.env.get("LANG")}&game_id=${Deno.env.get("GAME_ID")}`;
         if (paginator != undefined && paginator != "") {
             url = `${url}&after=${paginator}`;
         }
