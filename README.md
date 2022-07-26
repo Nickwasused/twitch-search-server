@@ -2,7 +2,7 @@
 The reason to create this API was because of this: https://discuss.dev.twitch.tv/t/search-by-title-not-possible/33868  
 
 # setup
-1. Install deno
+1. Install [deno](https://github.com/denoland)
 2. Copy ```.env.example``` to ```.env```
 3. Fill in the values in ```.env```
 4. Run ```deno run --allow-net --allow-read --allow-env .\index.ts```
