@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.149.0/http/server.ts";
 import { config } from "https://deno.land/std@0.149.0/dotenv/mod.ts";
 
 const server_config = await config();
-console.log(server_config);
 let token = await get_auth();
 if (token == undefined) {
     Deno.exit(1);
