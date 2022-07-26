@@ -155,4 +155,4 @@ function handler(req: Request): Response {
     
 }
 
-serve(handler);
+serve(handler, { port: Deno.env.get("PORT") });
