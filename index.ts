@@ -19,6 +19,7 @@ async function get_auth() {
     })
     if (api_response.status == 200) {
         let token = await api_response.json();
+        console.log(token)
         return token["access_token"]
     } else {
         console.warn("couldn`t get token")
@@ -28,7 +29,6 @@ async function get_auth() {
 
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
-    console.info("fetching streams");
     let fetching = true;
     let tempstreams = [];
     let paginator = "";
@@ -49,7 +49,7 @@ async function get_streams() {
             headers: headers
         })
 
-        if (current_streams.status != 200) {
+        if (current_streams.status == 401) {
             token = await get_auth();
         }
 
