@@ -10,7 +10,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: superfly/flyctl-actions@1.1
         with:
-          args: "deploy --config fly-de.toml"
+          args: "deploy --config fly-de-gta.toml"
       - uses: superfly/flyctl-actions@1.1
         with:
-          args: "deploy --config fly-en.toml"
+          args: "deploy --config fly-en-gta.toml"
+      - uses: superfly/flyctl-actions@1.1
+        with:
+          args: "deploy --config fly-de-rdr2.toml"
