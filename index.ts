@@ -1,9 +1,49 @@
 import { serve } from "https://deno.land/std@0.149.0/http/server.ts";
+import { config } from "https://deno.land/std@0.149.0/dotenv/mod.ts";
+
+// start config
+
+const server_config = await config();
+
+let client_id: string;
+let client_secret: string;
+let lang: string;
+let game_id: string;
+let listen_port: Number;
+
+client_id = server_config["CLIENT_ID"];
+client_secret = server_config["CLIENT_SECRET"];
+lang = server_config["LANG"];
+game_id = server_config["GAME_ID"];
+listen_port = parseInt(server_config["PORT"]);
+
+if (client_id == undefined) {
+    client_id = Deno.env.get("CLIENT_ID");
+}
+
+if (client_secret == undefined) {
+    client_secret = Deno.env.get("CLIENT_SECRET");
+}
+
+if (lang == undefined) {
+    lang = Deno.env.get("LANG");
+}
+
+if (game_id == undefined) {
+    game_id = Deno.env.get("GAME_ID");
+}
+
+if (listen_port == undefined) {
+    listen_port = parseInt(Deno.env.get("PORT"));
+}
+
+// end config
 
 let token = await get_auth();
 if (token == undefined) {
     Deno.exit(1);
 }
+
 let streams = <any[]>[];
 
 async function get_auth() {
@@ -13,8 +53,8 @@ async function get_auth() {
         method: "POST",
         headers: headers,
         body: JSON.stringify({
-            "client_id": Deno.env.get("CLIENT_ID"),
-            "client_secret": Deno.env.get("CLIENT_SECRET"),
+            "client_id": client_id,
+            "client_secret": client_secret,
             "grant_type": "client_credentials"
         })
     })
@@ -37,11 +77,11 @@ async function get_streams() {
     while (fetching) {
         let headers = new Headers({
             "content-type": "application/json",
-            "client-id": Deno.env.get("CLIENT_ID"),
+            "client-id": client_id,
             "Authorization": `Bearer ${token}`
         })
 
-        let url = `${streams_url}?first=100&language=${Deno.env.get("LANG")}&game_id=${Deno.env.get("GAME_ID")}`;
+        let url = `${streams_url}?first=100&language=${lang}&game_id=${game_id}`;
         if (paginator != undefined && paginator != "") {
             url = `${url}&after=${paginator}`;
         }
@@ -155,6 +195,4 @@ function handler(req: Request): Response {
     
 }
 
-let port = Deno.env.get("PORT");
-
-serve(handler, { port });
+serve(handler, { port: listen_port });
