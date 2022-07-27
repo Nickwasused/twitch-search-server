@@ -34,7 +34,7 @@ if (game_id == undefined) {
 }
 
 if (listen_port == undefined) {
-    listen_port = parseInt(Deno.env.get("PORT"));
+    listen_port = parseInt(Deno.env.get("PORT") ?? "8000");
 }
 
 // end config
