@@ -9,7 +9,7 @@ let client_id: string;
 let client_secret: string;
 let lang: string;
 let game_id: string;
-let listen_port: Number;
+let listen_port: number;
 
 client_id = server_config["CLIENT_ID"];
 client_secret = server_config["CLIENT_SECRET"];
@@ -18,19 +18,24 @@ game_id = server_config["GAME_ID"];
 listen_port = parseInt(server_config["PORT"]);
 
 if (client_id == undefined) {
-    client_id = Deno.env.get("CLIENT_ID");
+    client_id = Deno.env.get("CLIENT_ID") ?? "";
 }
 
 if (client_secret == undefined) {
-    client_secret = Deno.env.get("CLIENT_SECRET");
+    client_secret = Deno.env.get("CLIENT_SECRET") ?? "";
 }
 
 if (lang == undefined) {
-    lang = Deno.env.get("LANG");
+    lang = Deno.env.get("LANG") ?? "";
 }
 
 if (game_id == undefined) {
-    game_id = Deno.env.get("GAME_ID");
+    game_id = Deno.env.get("GAME_ID") ?? "";
+}
+
+if (client_id == "" || client_secret == "" || lang == "" || game_id == "") {
+    console.error("missing config");
+    Deno.exit(1);
 }
 
 if (listen_port == undefined) {
@@ -44,7 +49,24 @@ if (token == undefined) {
     Deno.exit(1);
 }
 
-let streams = <any[]>[];
+interface Streamer {
+    id: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    game_id: string;
+    game_name: string;
+    type: string;
+    title: string;
+    viewer_count: number;
+    started_at: string;
+    language: string;
+    thumbnail_url: string;
+    tag_ids: Array<string>;
+    is_mature: boolean;
+}
+
+let streams = <Array<Streamer>[]>[];
 
 async function get_auth() {
     const token_url = "https://id.twitch.tv/oauth2/token";
@@ -59,7 +81,7 @@ async function get_auth() {
         })
     })
     if (api_response.status == 200) {
-        let token = await api_response.json();
+        const token = await api_response.json();
         console.info("got a access token")
         return token["access_token"]
     } else {
@@ -71,11 +93,11 @@ async function get_auth() {
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
     let fetching = true;
-    let tempstreams = <any[]>[];
+    let tempstreams = <Array<Streamer>[]>[];
     let paginator = "";
 
     while (fetching) {
-        let headers = new Headers({
+        const headers = new Headers({
             "content-type": "application/json",
             "client-id": client_id,
             "Authorization": `Bearer ${token}`
@@ -86,7 +108,7 @@ async function get_streams() {
             url = `${url}&after=${paginator}`;
         }
 
-        let current_streams = await fetch(url, {
+        const current_streams = await fetch(url, {
             headers: headers
         })
 
@@ -94,7 +116,7 @@ async function get_streams() {
             token = await get_auth();
         }
 
-        let tmp_stream_data = await current_streams.json();
+        const tmp_stream_data = await current_streams.json();
         tempstreams = [...tempstreams, ...tmp_stream_data["data"]];
         if (tmp_stream_data["pagination"]["cursor"] == undefined || tmp_stream_data["pagination"]["cursor"] == "IA") {
             fetching = false;
@@ -109,7 +131,7 @@ async function get_streams() {
 // startup fetch and interval setup
 // 1 minute interval
 await get_streams();
-const fetch_interval = setInterval(get_streams.bind(this), 1 * 60 * 1000);
+const _fetch_interval = setInterval(get_streams.bind(this), 1 * 60 * 1000);
 
 const search_params = [
     "id",
@@ -132,12 +154,12 @@ function handler(req: Request): Response {
     const request = req;
     const params = new URL(request.url).searchParams;
     
-    let filters = <any[]>[];
+    const filters = <Record<string, string>[]>[];
     search_params.forEach(param => {
         if (params.has(param)) {
             filters.push({
-               "param": param, 
-               "value": params.get(param)
+               param: param, 
+               value: params.get(param) ?? ""
             })
         }
     });
@@ -153,11 +175,11 @@ function handler(req: Request): Response {
         });
     }
 
-    let api_response = streams.filter((stream) => {
+    const api_response = streams.filter((stream) => {
         let pass = false;
         filters.forEach(filter => {
             let local_pass= false;
-            let values = <string[]>filter.value.split(",");
+            const values = <string[]>filter.value.split(",");
             values.forEach((value) => {
                 if (value === '') {
                     if (!pass) {
@@ -173,7 +195,6 @@ function handler(req: Request): Response {
                         }
                     }
                 }
-
             })
         })
         if (pass) {
