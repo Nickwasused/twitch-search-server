@@ -142,6 +142,17 @@ function handler(req: Request): Response {
         }
     });
 
+    if (filters.length == 0) {
+        return new Response(`Please use the following filters: ${search_params}`, {
+            headers: {
+                "content-type": "text/plain",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET",
+                "Cache-Control": "public, max-age=600"
+            }
+        });
+    }
+
     let api_response = streams.filter((stream) => {
         let pass = false;
         filters.forEach(filter => {
@@ -182,9 +193,9 @@ function handler(req: Request): Response {
             }
         });
     } else {
-        return new Response(`Please use the following filters: ${search_params}`, {
+        return new Response(JSON.stringify([]), {
             headers: {
-                "content-type": "text/plain",
+                "content-type": "application/json",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
                 "Cache-Control": "public, max-age=600"
