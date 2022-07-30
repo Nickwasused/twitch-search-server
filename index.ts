@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.150.0/http/server.ts";
 import { config } from "https://deno.land/std@0.150.0/dotenv/mod.ts";
 
 // start config
@@ -154,63 +153,74 @@ interface Filter {
     [key: string]: string;
 }
 
-function handler(req: Request): Response {
-    const request = req;
-    const params = new URL(request.url).searchParams;
-    
-    const filters: Filter = {};
-    search_params.forEach(param => {
-        if (params.has(param)) {
-            filters[param] = params.get(param)?.split(",") ?? ""
-        }
-    });
-
-    if (Object.keys(filters).length == 0) {
-        return new Response(`Please use the following filters: ${search_params}`, {
-            headers: {
-                "content-type": "text/plain",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=600"
+async function handleHttp(conn: Deno.Conn) {
+    for await (const e of Deno.serveHttp(conn)) {
+        const request = e.request;
+        const params = new URL(request.url).searchParams;
+        
+        const filters: Filter = {};
+        search_params.forEach(param => {
+            if (params.has(param)) {
+                filters[param] = params.get(param)?.split(",") ?? ""
             }
         });
-    }
-
-    const api_response = streams.filter((stream) => {
-        // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
-        const return_stream = Object.keys(filters).every(key => {
-            for (let i=0; i<filters[key].length; i++) {
-                if (stream[key].toString().toLowerCase().includes(filters[key][i].toString().toLowerCase()) || stream[key] == filters[key][i]) {
-                    return true;
-                } else {
-                    return false
+    
+        if (Object.keys(filters).length == 0) {
+            e.respondWith(new Response(`Please use the following filters: ${search_params}`, {
+                headers: {
+                    "content-type": "text/plain",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET",
+                    "Cache-Control": "public, max-age=600"
                 }
-            }
-        });
-        return return_stream;
-    });
-
-    if (api_response.length != 0) {
-        return new Response(JSON.stringify(api_response), {
-            headers: {
-                "content-type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=60"
-            }
-        });
-    } else {
-        return new Response(JSON.stringify([]), {
-            headers: {
-                "content-type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=600"
-            }
-        });
-    }
-
+            }));
+        }
     
+        const api_response = await streams.filter((stream) => {
+            // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
+            const return_stream = Object.keys(filters).every(key => {
+                for (let i=0; i<filters[key].length; i++) {
+                    if (stream[key].toString().toLowerCase().includes(filters[key][i].toString().toLowerCase()) || stream[key] == filters[key][i]) {
+                        return true;
+                    } else {
+                        return false
+                    }
+                }
+            });
+            return return_stream;
+        });
+    
+        if (api_response.length != 0) {
+            e.respondWith(new Response(JSON.stringify(api_response), {
+                headers: {
+                    "content-type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET",
+                    "Cache-Control": "public, max-age=60"
+                }
+            }));
+        } else {
+            e.respondWith(new Response(JSON.stringify([]), {
+                headers: {
+                    "content-type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET",
+                    "Cache-Control": "public, max-age=600"
+                }
+            }));
+        }
+    }
 }
 
-serve(handler, { listen_port });
+
+const server = Deno.listen({ port: listen_port });
+console.log(`listening on http://localhost:${listen_port}`);
+while (true) {
+    try {
+      const conn = await server.accept();
+      handleHttp(conn);
+    } catch (err) {
+      console.error(err);
+      break;
+    }
+}
