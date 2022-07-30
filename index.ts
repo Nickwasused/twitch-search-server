@@ -8,13 +8,13 @@ let client_id: string;
 let client_secret: string;
 let lang: string;
 let game_id: string;
-let port: number;
+let listen_port: number;
 
 client_id = server_config["CLIENT_ID"];
 client_secret = server_config["CLIENT_SECRET"];
 lang = server_config["LANG"];
 game_id = server_config["GAME_ID"];
-port = parseInt(server_config["PORT"]);
+listen_port = parseInt(server_config["PORT"]);
 
 if (client_id == undefined) {
     client_id = Deno.env.get("CLIENT_ID") ?? "";
@@ -37,8 +37,8 @@ if (client_id == "" || client_secret == "" || lang == "" || game_id == "") {
     Deno.exit(1);
 }
 
-if (port == undefined) {
-    port = parseInt(Deno.env.get("PORT") ?? "8000");
+if (listen_port == undefined) {
+    listen_port = parseInt(Deno.env.get("PORT") ?? "8000");
 }
 
 // end config
@@ -213,8 +213,8 @@ async function handleHttp(conn: Deno.Conn) {
 }
 
 
-const server = Deno.listen({ port });
-console.log(`listening on http://localhost:${port}`);
+const server = Deno.listen({ port: listen_port });
+console.log(`listening on http://localhost:${listen_port}`);
 while (true) {
     try {
       const conn = await server.accept();
