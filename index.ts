@@ -66,7 +66,7 @@ interface Streamer {
     is_mature: boolean;
 }
 
-let streams = <Array<Streamer>[]>[];
+let streams: Streamer[] = [];
 
 async function get_auth() {
     const token_url = "https://id.twitch.tv/oauth2/token";
@@ -93,7 +93,7 @@ async function get_auth() {
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
     let fetching = true;
-    let tempstreams = <Array<Streamer>[]>[];
+    let tempstreams: Streamer[] = []
     let paginator = "";
 
     while (fetching) {
@@ -150,21 +150,22 @@ const search_params = [
     "is_mature"
 ];
 
+interface Filter {
+    [key: string]: string;
+}
+
 function handler(req: Request): Response {
     const request = req;
     const params = new URL(request.url).searchParams;
     
-    const filters = <Record<string, string>[]>[];
+    const filters: Filter = {};
     search_params.forEach(param => {
         if (params.has(param)) {
-            filters.push({
-               param: param, 
-               value: params.get(param) ?? ""
-            })
+            filters[param] = params.get(param)?.split(",") ?? ""
         }
     });
 
-    if (filters.length == 0) {
+    if (Object.keys(filters).length == 0) {
         return new Response(`Please use the following filters: ${search_params}`, {
             headers: {
                 "content-type": "text/plain",
@@ -176,32 +177,17 @@ function handler(req: Request): Response {
     }
 
     const api_response = streams.filter((stream) => {
-        let pass = false;
-        filters.forEach(filter => {
-            let local_pass= false;
-            const values = <string[]>filter.value.split(",");
-            values.forEach((value) => {
-                if (value === '') {
-                    if (!pass) {
-                        pass = false;
-                    }
+        // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
+        const return_stream = Object.keys(filters).every(key => {
+            for (let i=0; i<filters[key].length; i++) {
+                if (stream[key].toString().toLowerCase().includes(filters[key][i].toString().toLowerCase()) || stream[key] == filters[key][i]) {
+                    return true;
                 } else {
-                    if (stream[filter.param].toString().toLowerCase().includes(value.toString().toLowerCase()) || stream[filter.param] == value) {
-                        pass = true;
-                        local_pass = true;
-                    } else {
-                        if (!local_pass) {
-                            pass = false; 
-                        }
-                    }
+                    return false
                 }
-            })
-        })
-        if (pass) {
-            return stream;
-        } else {
-            return null;
-        }
+            }
+        });
+        return return_stream;
     });
 
     if (api_response.length != 0) {
