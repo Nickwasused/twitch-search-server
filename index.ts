@@ -151,7 +151,7 @@ const search_params = [
 ];
 
 interface Filter {
-    [key: string]: string;
+    [key: string]: string[];
 }
 
 function handler(req: Request): Response {
@@ -161,7 +161,7 @@ function handler(req: Request): Response {
     const filters: Filter = {};
     search_params.forEach(param => {
         if (params.has(param)) {
-            filters[param] = params.get(param)?.split(",") ?? ""
+            filters[param] = params.get(param)?.split(",") ?? []
         }
     });
 
