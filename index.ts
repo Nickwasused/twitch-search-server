@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.149.0/http/server.ts";
-import { config } from "https://deno.land/std@0.149.0/dotenv/mod.ts";
+import { serve } from "https://deno.land/std@0.150.0/http/server.ts";
+import { config } from "https://deno.land/std@0.150.0/dotenv/mod.ts";
 
 // start config
 
