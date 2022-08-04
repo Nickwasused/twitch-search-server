@@ -182,8 +182,6 @@ function handler(req: Request): Response {
             for (let i=0; i<filters[key].length; i++) {
                 if (stream[key].toString().toLowerCase().includes(filters[key][i].toString().toLowerCase()) || stream[key] == filters[key][i]) {
                     return true;
-                } else {
-                    return false
                 }
             }
         });
