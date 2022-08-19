@@ -68,6 +68,10 @@ interface Streamer {
 
 let streams: Streamer[] = [];
 
+/**
+ * Get the Twitch auth token
+ * @returns {String} Twitch Auth Token
+*/
 async function get_auth() {
     const token_url = "https://id.twitch.tv/oauth2/token";
     const headers = new Headers({ "content-type": "application/json" });
@@ -90,6 +94,11 @@ async function get_auth() {
     }
 }
 
+/**
+ * Get all Streams with the set `lang` and `game_id`
+ * @returns {array<Streamer>} Array of Streamers
+ * @see {@link Streamer} 
+*/
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
     let fetching = true;
