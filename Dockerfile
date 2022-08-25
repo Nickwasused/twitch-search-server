@@ -4,7 +4,7 @@ EXPOSE 8000
 
 WORKDIR /app
 
-COPY *.ts /app
+COPY *.ts /app/
 COPY deno.json /app
 
 CMD ["cache", "index.ts"]
