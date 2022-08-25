@@ -184,7 +184,7 @@ function handler(req: Request): Response {
                 "content-type": "application/json",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=600"
+                "Cache-Control": "public, max-age=60"
             }
         });
     }
