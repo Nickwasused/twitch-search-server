@@ -1,29 +1,21 @@
 import { serve } from "https://deno.land/std@0.153.0/http/server.ts";
-import { config as cfg } from "https://deno.land/std@0.153.0/dotenv/mod.ts";
+import "https://deno.land/std@0.153.0/dotenv/load.ts";
 
-// start config
-
-const config = await cfg();
-
-const client_id: string = config["CLIENT_ID"];
-const client_secret: string = config["CLIENT_SECRET"];
-const lang: string = config["LANG"];
-const game_id: string = config["GAME_ID"];
-let listen_port: number = parseInt(config["PORT"]);
+// load config
+const server_config = Deno.env.toObject();
+const client_id: string = server_config["CLIENT_ID"];
+const client_secret: string = server_config["CLIENT_SECRET"];
+const lang: string = server_config["TWITCH_LANG"];
+const game_id: string = server_config["GAME_ID"];
+const listen_port: number = parseInt(server_config["PORT"] ?? "8000");
 
 // check config
-
-if (client_id == "" || client_secret == "" || lang == "" || game_id == "") {
+if (client_id == undefined || client_secret == undefined || lang == undefined || game_id == undefined) {
     console.error("missing config");
     Deno.exit(1);
 }
 
-if (listen_port == undefined) {
-    listen_port = parseInt(Deno.env.get("PORT") ?? "8000");
-}
-
-// end config
-
+// get twitch auth token
 let token = await get_auth();
 if (token == undefined) {
     Deno.exit(1);
