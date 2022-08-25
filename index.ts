@@ -1,37 +1,17 @@
-import { serve } from "https://deno.land/std@0.152.0/http/server.ts";
-import { config } from "https://deno.land/std@0.152.0/dotenv/mod.ts";
+import { serve } from "https://deno.land/std@0.153.0/http/server.ts";
+import { config as cfg } from "https://deno.land/std@0.153.0/dotenv/mod.ts";
 
 // start config
 
-const server_config = await config();
+const config = await cfg();
 
-let client_id: string;
-let client_secret: string;
-let lang: string;
-let game_id: string;
-let listen_port: number;
+const client_id: string = config["CLIENT_ID"];
+const client_secret: string = config["CLIENT_SECRET"];
+const lang: string = config["LANG"];
+const game_id: string = config["GAME_ID"];
+let listen_port: number = parseInt(config["PORT"]);
 
-client_id = server_config["CLIENT_ID"];
-client_secret = server_config["CLIENT_SECRET"];
-lang = server_config["LANG"];
-game_id = server_config["GAME_ID"];
-listen_port = parseInt(server_config["PORT"]);
-
-if (client_id == undefined) {
-    client_id = Deno.env.get("CLIENT_ID") ?? "";
-}
-
-if (client_secret == undefined) {
-    client_secret = Deno.env.get("CLIENT_SECRET") ?? "";
-}
-
-if (lang == undefined) {
-    lang = Deno.env.get("LANG") ?? "";
-}
-
-if (game_id == undefined) {
-    game_id = Deno.env.get("GAME_ID") ?? "";
-}
+// check config
 
 if (client_id == "" || client_secret == "" || lang == "" || game_id == "") {
     console.error("missing config");
