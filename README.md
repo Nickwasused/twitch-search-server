@@ -16,9 +16,6 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 7. Now check the Status by running: ```flyctl status```  
 8. The Page should show: ```status  "done"```  
 
-# Railway.app
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/sAmxi6)  
-
 # API Docs
 
 [https://nickwasused.com/twitch-search-server/](https://twitch-search-server-docs.nickwasused.com/)

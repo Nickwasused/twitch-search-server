@@ -21,23 +21,6 @@ if (token == undefined) {
     Deno.exit(1);
 }
 
-interface Streamer {
-    id: string;
-    user_id: string;
-    user_login: string;
-    user_name: string;
-    game_id: string;
-    game_name: string;
-    type: string;
-    title: string;
-    viewer_count: number;
-    started_at: string;
-    language: string;
-    thumbnail_url: string;
-    tag_ids: Array<string>;
-    is_mature: boolean;
-}
-
 let streams: Streamer[] = [];
 
 /**
@@ -57,7 +40,7 @@ async function get_auth() {
         })
     })
     if (api_response.status == 200) {
-        const token = await api_response.json();
+        const token: Twitch_Api_Token = await api_response.json();
         console.info("got a access token")
         return token["access_token"]
     } else {
@@ -95,16 +78,16 @@ async function get_streams() {
 
         if (current_streams.status == 401) {
             token = await get_auth();
-        }
-
-        const tmp_stream_data = await current_streams.json();
-        tempstreams = [...tempstreams, ...tmp_stream_data["data"]];
-        if (tmp_stream_data["pagination"]["cursor"] == undefined || tmp_stream_data["pagination"]["cursor"] == "IA") {
-            fetching = false;
-            console.info(`done fetching ${tempstreams.length} streams`);
-            streams = tempstreams;
         } else {
-            paginator = tmp_stream_data["pagination"]["cursor"];
+            const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
+            tempstreams = [...tempstreams, ...tmp_stream_data["data"]];
+            if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
+                fetching = false;
+                console.info(`done fetching ${tempstreams.length} streams`);
+                streams = tempstreams;
+            } else {
+                paginator = tmp_stream_data.pagination.cursor;
+            }
         }
     }
 }
