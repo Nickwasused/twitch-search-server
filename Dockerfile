@@ -18,5 +18,5 @@ WORKDIR /app
 EXPOSE 8000
 
 COPY --from=builder "/app/twitch" "/app/twitch"
-CMD ["chmod +x ./twitch"]
-CMD ["./twitch"]
+RUN chmod +x ./twitch
+ENTRYPOINT ["./twitch"]
