@@ -2,9 +2,10 @@
     "tasks": {
       "dev": "deno run --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --allow-read --allow-env --watch --no-check index.ts --dev",
       "run": "deno run --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --allow-read --allow-env index.ts",
-      "build-windows": "deno compile --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --no-prompt --allow-read --allow-env --no-check --target x86_64-pc-windows-msvc index.ts -o twitch-search-server.exe",
-      "build-linux": "deno compile --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --no-prompt --allow-read --allow-env --no-check --target x86_64-unknown-linux-gnu index.ts -o twitch-search-server",
+      "build-windows": "deno compile --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --no-prompt --allow-read --allow-env --no-check --target x86_64-pc-windows-msvc -o twitch.exe index.ts",
+      "build-linux": "deno compile --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --no-prompt --allow-read --allow-env --no-check --target x86_64-unknown-linux-gnu -o twitch index.ts",
       "docker-build": "docker build -t tss -f Dockerfile .",
-      "docker-run": "docker run -d -p 8000:8000 tss"
+      "docker-run": "docker run -d -p 8000:8000 tss",
+      "docker-shell": "docker run -it tss:latest /bin/bash"
     }
   }
