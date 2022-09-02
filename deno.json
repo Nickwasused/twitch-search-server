@@ -6,6 +6,6 @@
       "build-linux": "deno compile --allow-net='id.twitch.tv,api.twitch.tv,0.0.0.0:8000' --no-prompt --allow-read --allow-env --no-check --target x86_64-unknown-linux-gnu -o twitch index.ts",
       "docker-build": "docker build -t tss -f Dockerfile .",
       "docker-run": "docker run -d -p 8000:8000 tss",
-      "docker-shell": "docker run -it tss:latest /bin/bash"
+      "docker-shell": "docker run -it tss:latest /bin/sh"
     }
   }

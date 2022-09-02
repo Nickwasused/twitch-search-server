@@ -17,8 +17,6 @@ COPY --from=builder /usr/lib/* /usr/lib/
 WORKDIR /app
 EXPOSE 8000
 
-RUN apk add --no-cache bash
-
 COPY --from=builder "/app/twitch" "/app/twitch"
 CMD ["chmod +x ./twitch"]
 CMD ["./twitch"]
