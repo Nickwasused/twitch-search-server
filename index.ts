@@ -130,12 +130,15 @@ function handler(req: Request): Response {
     });
 
     if (Object.keys(filters).length == 0) {
+        const valid_until = new Date();
+        valid_until.setSeconds(valid_until.getSeconds() + 600);
         return new Response(`Please use the following filters: ${search_params}`, {
             headers: {
                 "content-type": "text/plain",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=600"
+                "Cache-Control": "public, max-age=600",
+                "X-Robots-Tag": `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`
             }
         });
     }
@@ -153,12 +156,15 @@ function handler(req: Request): Response {
     });
 
     if (api_response.length != 0) {
+        const valid_until = new Date();
+        valid_until.setSeconds(valid_until.getSeconds() + 60);
         return new Response(JSON.stringify(api_response), {
             headers: {
                 "content-type": "application/json",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=60"
+                "Cache-Control": "public, max-age=60",
+                "X-Robots-Tag": `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`
             }
         });
     } else {
