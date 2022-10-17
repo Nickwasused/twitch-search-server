@@ -191,3 +191,5 @@ servers:
     description: "[DE][GTA5]"
   - url: https://twitch-search-server-en.nickwasused.com/
     description: "[EN][GTA5]"
+  - url: https://twitch-search-server-de-rdr2.nickwasused.com
+    description: "[DE][RDRD2]"
