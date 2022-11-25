@@ -25,6 +25,14 @@ if (token == undefined) {
 let streams: Streamer[] = [];
 
 /**
+ * Remove duplicates from a Array
+ * @returns {Array} Array without Duplicates
+*/
+function deduplicate<T>(array: T[]) {
+    return array.filter((value, index) => array.indexOf(value) === index);
+}
+
+/**
  * Get the Twitch auth token
  * @returns {String} Twitch Auth Token
 */
@@ -85,6 +93,8 @@ async function get_streams() {
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
                 console.info(`done fetching ${tempstreams.length} streams`);
+                // remove duplicates
+                tempstreams = deduplicate(tempstreams);
                 streams = tempstreams;
             } else {
                 paginator = tmp_stream_data.pagination.cursor;
