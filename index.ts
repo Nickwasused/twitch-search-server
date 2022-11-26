@@ -1,6 +1,6 @@
 // @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.159.0/http/server.ts";
-import "https://deno.land/std@0.159.0/dotenv/load.ts";
+import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
+import "https://deno.land/std@0.166.0/dotenv/load.ts";
 
 // load config
 const server_config = Deno.env.toObject();
@@ -162,6 +162,7 @@ function handler(req: Request): Response {
         // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
         const return_stream = Object.keys(filters).every(key => {
             for (let i=0; i<filters[key].length; i++) {
+                if (filters[key][i] == "") { return false; } 
                 if (stream[key as keyof typeof stream].toString().toLowerCase().includes(filters[key][i].toString().toLowerCase()) || stream[key as keyof typeof stream] == filters[key][i]) {
                     return true;
                 }
