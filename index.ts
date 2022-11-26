@@ -25,11 +25,17 @@ if (token == undefined) {
 let streams: Streamer[] = [];
 
 /**
- * Remove duplicates from a Array
- * @returns {Array} Array without Duplicates
+ * Remove duplicates from a Streams Array
+ * @returns {Array[Streamer]} Streams Array without Duplicates
 */
-function deduplicate<T>(array: T[]) {
-    return array.filter((value, index) => array.indexOf(value) === index);
+function deduplicate_streams(array: Streamer[]) {
+    const tmp_ids: number[] = [];
+    return array.filter((element) => {
+        if (tmp_ids[parseInt(element.id)] == undefined) {
+            tmp_ids.push(parseInt(element.id));
+            return element
+        } 
+    });
 }
 
 /**
@@ -93,8 +99,6 @@ async function get_streams() {
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
                 console.info(`done fetching ${tempstreams.length} streams`);
-                // remove duplicates
-                tempstreams = deduplicate(tempstreams);
                 streams = tempstreams;
             } else {
                 paginator = tmp_stream_data.pagination.cursor;
@@ -169,7 +173,7 @@ function handler(req: Request): Response {
     if (api_response.length != 0) {
         const valid_until = new Date();
         valid_until.setSeconds(valid_until.getSeconds() + 60);
-        return new Response(JSON.stringify(api_response), {
+        return new Response(JSON.stringify(deduplicate_streams(api_response)), {
             headers: {
                 "content-type": "application/json",
                 "Access-Control-Allow-Origin": "*",
