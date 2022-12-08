@@ -54,7 +54,7 @@ async function get_auth() {
             "grant_type": "client_credentials"
         })
     })
-    if (api_response.status == 200) {
+    if (api_response.ok) {
         const token: Twitch_Api_Token = await api_response.json();
         console.info("got a access token")
         return token["access_token"]
