@@ -1,6 +1,6 @@
 // @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
-import "https://deno.land/std@0.166.0/dotenv/load.ts";
+import { serve } from "https://deno.land/std@0.167.0/http/server.ts";
+import "https://deno.land/std@0.167.0/dotenv/load.ts";
 
 // load config
 const server_config = Deno.env.toObject();
@@ -17,7 +17,7 @@ if (client_id == undefined || client_secret == undefined || lang == undefined ||
 }
 
 // get twitch auth token
-let token = await get_auth();
+let token: string | undefined = await get_auth();
 if (token == undefined) {
     Deno.exit(1);
 }
@@ -29,12 +29,12 @@ let streams: Streamer[] = [];
  * @returns {Array[Streamer]} Streams Array without Duplicates
 */
 function deduplicate_streams(array: Streamer[]) {
-    const tmp_ids: string[] = [];
+    const uniqueIds = new Set<string>();
     return array.filter((element) => {
-        if (!tmp_ids.includes(element.id)) {
-            tmp_ids.push(element.id);
+        if (!uniqueIds.has(element.id)) {
+            uniqueIds.add(element.id);
             return element;
-        } 
+        }
     });
 }
 
@@ -54,7 +54,7 @@ async function get_auth() {
             "grant_type": "client_credentials"
         })
     })
-    if (api_response.status == 200) {
+    if (api_response.ok) {
         const token: Twitch_Api_Token = await api_response.json();
         console.info("got a access token")
         return token["access_token"]
@@ -71,17 +71,16 @@ async function get_auth() {
 */
 async function get_streams() {
     const streams_url = "https://api.twitch.tv/helix/streams";
+    const tempstreams: Streamer[] = [];
+    const headers = new Headers({
+        "content-type": "application/json",
+        "client-id": client_id,
+        "Authorization": `Bearer ${token}`
+    })
     let fetching = true;
-    let tempstreams: Streamer[] = []
     let paginator = "";
-
+    
     while (fetching) {
-        const headers = new Headers({
-            "content-type": "application/json",
-            "client-id": client_id,
-            "Authorization": `Bearer ${token}`
-        })
-
         let url = `${streams_url}?first=100&language=${lang}&game_id=${game_id}`;
         if (paginator != undefined && paginator != "") {
             url = `${url}&after=${paginator}`;
@@ -95,7 +94,7 @@ async function get_streams() {
             token = await get_auth();
         } else {
             const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
-            tempstreams = [...tempstreams, ...tmp_stream_data["data"]];
+            tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data["data"]);
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
                 console.info(`done fetching ${tempstreams.length} streams`);
@@ -110,9 +109,9 @@ async function get_streams() {
 // startup fetch and interval setup
 // 1 minute interval
 await get_streams();
-const _fetch_interval = setInterval(get_streams.bind(this), 1 * 60 * 1000);
+const _fetch_interval: number = setInterval(get_streams.bind(this), 1 * 60 * 1000);
 
-const search_params = [
+const search_params: string[] = [
     "id",
     "user_id",
     "user_login",
@@ -193,8 +192,6 @@ function handler(req: Request): Response {
             }
         });
     }
-
-    
 }
 
 serve(handler, { listen_port });
