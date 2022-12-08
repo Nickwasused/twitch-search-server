@@ -29,12 +29,12 @@ let streams: Streamer[] = [];
  * @returns {Array[Streamer]} Streams Array without Duplicates
 */
 function deduplicate_streams(array: Streamer[]) {
-    const tmp_ids: string[] = [];
+    const uniqueIds = new Set<string>();
     return array.filter((element) => {
-        if (!tmp_ids.includes(element.id)) {
-            tmp_ids.push(element.id);
+        if (!uniqueIds.has(element.id)) {
+            uniqueIds.add(element.id);
             return element;
-        } 
+        }
     });
 }
 
