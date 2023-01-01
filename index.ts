@@ -1,6 +1,6 @@
 // @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.167.0/http/server.ts";
-import "https://deno.land/std@0.167.0/dotenv/load.ts";
+import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
+import "https://deno.land/std@0.170.0/dotenv/load.ts";
 
 // load config
 const server_config = Deno.env.toObject();

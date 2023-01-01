@@ -1,5 +1,5 @@
 # build step
-FROM denoland/deno:alpine-1.28.2 AS builder
+FROM denoland/deno:alpine-1.29.1 AS builder
 WORKDIR /app
 
 COPY *.ts /app/
