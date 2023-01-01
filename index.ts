@@ -78,12 +78,12 @@ async function get_streams() {
         "Authorization": `Bearer ${token}`
     })
     let fetching = true;
-    let paginator = "";
+    let paginator: pagination = {};
     
     while (fetching) {
         let url = `${streams_url}?first=100&language=${lang}&game_id=${game_id}`;
-        if (paginator != undefined && paginator != "") {
-            url = `${url}&after=${paginator}`;
+        if (paginator.cursor) {
+            url = `${url}&after=${paginator.cursor}`;
         }
 
         const current_streams = await fetch(url, {
@@ -100,7 +100,7 @@ async function get_streams() {
                 console.info(`done fetching ${tempstreams.length} streams`);
                 streams = tempstreams;
             } else {
-                paginator = tmp_stream_data.pagination.cursor;
+                paginator = tmp_stream_data.pagination;
             }
         }
     }
