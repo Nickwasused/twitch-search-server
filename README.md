@@ -18,12 +18,13 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # API Docs
 
-[https://nickwasused.github.io/twitch-search-server/](https://nickwasused.github.io/twitch-search-server/)
+[https://twitch-search-server-docs.nickwasused.com/](https://twitch-search-server-docs.nickwasused.com/)
 
 # Instances
 
 | Instance | User | Language | Game | Uptime
 | - | - | - | - | -
-| https://twitch-search-server.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge)
+| https://twitch-search-server-de-gta5-1.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge)
+| https://twitch-search-server-de-gta5-2.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge)
+| https://twitch-search-server-en-gta5.nickwasused.com/ | Nickwasused | EN | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791828321-1d8398a4dece3d0908cd3fff?style=for-the-badge)
 | https://twitch-search-server-de-rdr2.nickwasused.com/ | Nickwasused | DE | 493959 (Red Dead Redemtion 2) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m792346611-5b5ca66a0aba9a70f1565cc4?style=for-the-badge)
-| https://twitch-search-server-en.nickwasused.com/ | Nickwasused | EN | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791828321-1d8398a4dece3d0908cd3fff?style=for-the-badge)
