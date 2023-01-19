@@ -94,7 +94,12 @@ async function get_streams() {
             token = await get_auth();
         } else {
             const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
-            tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data["data"]);
+            if (tmp_stream_data == undefined) {
+                fetching = false;
+                console.error(`done fetching ${tempstreams.length} streams, but with an error!`);
+                streams = tempstreams;
+            }
+            tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data.data);
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
                 console.info(`done fetching ${tempstreams.length} streams`);
