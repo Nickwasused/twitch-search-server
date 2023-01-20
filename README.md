@@ -22,7 +22,7 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # Instances
 
-These instances are rate limited by the Cloudflare WAF. You can request 5 searches every 10 seconds.  
+These instances are rate limited by the Cloudflare WAF. You can request 10 searches every 10 seconds.  
 If you hit the rate limit, then you get a 429 response with the following content: `{"status": "rate-limit"}`
 
 | Instance | User | Language | Game | Uptime
