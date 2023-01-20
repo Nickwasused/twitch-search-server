@@ -1,6 +1,6 @@
 // @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
-import "https://deno.land/std@0.170.0/dotenv/load.ts";
+import { serve } from "https://deno.land/std@0.173.0/http/server.ts";
+import "https://deno.land/std@0.173.0/dotenv/load.ts";
 
 // load config
 const server_config = Deno.env.toObject();
@@ -86,9 +86,21 @@ async function get_streams() {
             url = `${url}&after=${paginator.cursor}`;
         }
 
-        const current_streams = await fetch(url, {
-            headers: headers
-        })
+        let current_streams;
+
+        try {
+            current_streams = await fetch(url, {
+                headers: headers
+            })
+        } catch (error) {
+            console.error(error);
+        }
+        
+        if (current_streams == undefined) {
+            fetching = false;
+            console.error(`error while fetching streams!`);
+            continue
+        }
 
         if (current_streams.status == 401) {
             token = await get_auth();
@@ -98,6 +110,7 @@ async function get_streams() {
                 fetching = false;
                 console.error(`done fetching ${tempstreams.length} streams, but with an error!`);
                 streams = tempstreams;
+                continue
             }
             tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data.data);
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
