@@ -115,8 +115,8 @@ async function get_streams() {
             tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data.data);
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
-                console.info(`done fetching ${tempstreams.length} streams`);
-                streams = tempstreams;
+                streams = deduplicate_streams(tempstreams);
+                console.info(`done fetching ${streams.length} streams`);
             } else {
                 paginator = tmp_stream_data.pagination;
             }
@@ -150,32 +150,36 @@ interface Filter {
     [key: string]: string[];
 }
 
-function handler(req: Request): Response {
-    const request = req;
-    const params = new URL(request.url).searchParams;
-    
+interface Headers {
+    [key: string]: string;
+}
+
+async function handler(_req: Request): Promise<Response> {
+    const params = new URL(_req.url);
+    const headers: Headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+    }
+
+    if (params.search == "") {
+        const valid_until = new Date();
+        valid_until.setSeconds(valid_until.getSeconds() + 600);
+        headers["Cache-Control"] = "public, max-age=600";
+        headers["content-type"] = "text/plain";
+        headers["X-Robots-Tag"] = `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`;
+        return new Response(`Please use the following filters: ${search_params}`,  { headers: headers });
+    }
+
+    const new_params: URLSearchParams = params.searchParams;
+
     const filters: Filter = {};
     search_params.forEach(param => {
-        if (params.has(param)) {
-            filters[param] = params.get(param)?.split(",") ?? []
+        if (new_params.has(param)) {
+            filters[param] = new_params.get(param)?.split(",") ?? []
         }
     });
 
-    if (Object.keys(filters).length == 0) {
-        const valid_until = new Date();
-        valid_until.setSeconds(valid_until.getSeconds() + 600);
-        return new Response(`Please use the following filters: ${search_params}`, {
-            headers: {
-                "content-type": "text/plain",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=600",
-                "X-Robots-Tag": `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`
-            }
-        });
-    }
-
-    const api_response = streams.filter((stream) => {
+    const api_response: Streamer[] = streams.filter((stream) => {
         // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
         const return_stream = Object.keys(filters).every(key => {
             for (let i=0; i<filters[key].length; i++) {
@@ -191,25 +195,15 @@ function handler(req: Request): Response {
     if (api_response.length != 0) {
         const valid_until = new Date();
         valid_until.setSeconds(valid_until.getSeconds() + 60);
-        return new Response(JSON.stringify(deduplicate_streams(api_response)), {
-            headers: {
-                "content-type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=60",
-                "X-Robots-Tag": `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`
-            }
-        });
+        headers["Cache-Control"] = "public, max-age=60";
+        headers["content-type"] = "application/json";
+        headers["X-Robots-Tag"] = `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`;
+        return new Response(JSON.stringify(api_response), { headers: headers });
     } else {
-        return new Response(JSON.stringify([]), {
-            headers: {
-                "content-type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-                "Cache-Control": "public, max-age=60"
-            }
-        });
+        headers["Cache-Control"] = "public, max-age=60";
+        headers["content-type"] = "application/json";
+        return new Response(JSON.stringify([]), { headers: headers });
     }
 }
 
-serve(handler, { listen_port });
+await serve(handler, { listen_port });
