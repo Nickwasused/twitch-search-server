@@ -30,4 +30,3 @@ If you hit the rate limit, then you get a 429 response with the following conten
 | https://twitch-search-server-de-gta5-1.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge)
 | https://twitch-search-server-en-gta5.nickwasused.com/ | Nickwasused | EN | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791828321-1d8398a4dece3d0908cd3fff?style=for-the-badge)
 | https://twitch-search-server-de-rdr2.nickwasused.com/ | Nickwasused | DE | 493959 (Red Dead Redemtion 2) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m792346611-5b5ca66a0aba9a70f1565cc4?style=for-the-badge)
-| https://twitch-search-server-en-rdr2.nickwasused.com/ | Nickwasused | EN | 493959 (Red Dead Redemtion 2) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m793521255-e93695b1018c223cc18b4598?style=for-the-badge)
