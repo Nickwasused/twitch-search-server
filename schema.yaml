@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: This is a API for the Twitch-Search-Server
     (https://github.com/Nickwasused/twitch-search-server).
-  version: 1.0.0
+  version: 1.0.1
   title: twitch-search-server
   termsOfService: ""
   contact:
@@ -187,9 +187,9 @@ components:
               
 
 servers:
-  - url: https://twitch-search-server.nickwasused.com/
+  - url: https://twitch-search-server-de-gta5-1.nickwasused.com/
     description: "[DE][GTA5]"
-  - url: https://twitch-search-server-en.nickwasused.com/
+  - url: https://twitch-search-server-en-gta5.nickwasused.com/
     description: "[EN][GTA5]"
-  - url: https://twitch-search-server-de-rdr2.nickwasused.com
+  - url: https://twitch-search-server-de-rdr2.nickwasused.com/
     description: "[DE][RDRD2]"
