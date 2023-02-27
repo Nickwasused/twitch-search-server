@@ -81,7 +81,7 @@ async function get_streams() {
     let paginator: pagination = {};
     
     while (fetching) {
-        let url = `${streams_url}?first=100&language=${lang}&game_id=${game_id}`;
+        let url = `${streams_url}?first=100&type=live&language=${lang}&game_id=${game_id}`;
         if (paginator.cursor) {
             url = `${url}&after=${paginator.cursor}`;
         }
