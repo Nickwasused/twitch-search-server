@@ -7,5 +7,29 @@
       "docker-build": "docker build -t tss -f Dockerfile .",
       "docker-run": "docker run -d -p 8000:8000 tss",
       "docker-shell": "docker run -it tss:latest /bin/sh"
+    },
+    "lint": {
+        "files": {
+            "include": ["routes/", "islands/", "components/"],
+            "exclude": []
+        },
+        "rules": {
+            "tags": ["recommended"],
+            "include": ["ban-untagged-todo"],
+            "exclude": ["no-unused-vars"]
+        }
+    },
+    "fmt": {
+        "files": {
+            "include": ["routes/", "islands/", "components/"],
+            "exclude": []
+        },
+        "options": {
+            "useTabs": true,
+            "lineWidth": 140,
+            "indentWidth": 4,
+            "singleQuote": true,
+            "proseWrap": "preserve"
+        }
     }
-  }
+}
