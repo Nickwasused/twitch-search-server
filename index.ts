@@ -1,6 +1,6 @@
 // @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.173.0/http/server.ts";
-import "https://deno.land/std@0.173.0/dotenv/load.ts";
+import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
+import "https://deno.land/std@0.184.0/dotenv/load.ts";
 
 // load config
 const server_config = Deno.env.toObject();
@@ -154,7 +154,7 @@ interface Headers {
     [key: string]: string;
 }
 
-async function handler(_req: Request): Promise<Response> {
+function handler(_req: Request): Response {
     const params = new URL(_req.url);
     const headers: Headers = {
         "Access-Control-Allow-Origin": "*",
@@ -206,4 +206,4 @@ async function handler(_req: Request): Promise<Response> {
     }
 }
 
-await serve(handler, { listen_port });
+serve(handler, { listen_port });
