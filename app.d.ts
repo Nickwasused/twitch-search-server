@@ -20,12 +20,14 @@ type Twitch_Api_Streams = {
     pagination: pagination
 }
 
-type Twitch_Api_Token = {
-    access_token: string,
-    expires_in: number,
-    token_type: string
-}
-
 type pagination = {
     cursor?: string
+}
+
+interface Filter {
+    [key: string]: string[];
+}
+
+interface Params {
+    [key: string]: string;
 }

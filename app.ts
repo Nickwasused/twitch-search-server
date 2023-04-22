@@ -1,6 +1,9 @@
-// @deno-types="./index.d.ts"
-import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
+// @deno-types="./app.d.ts"
+import { Application, helpers, context, Status } from "https://deno.land/x/oak@v12.2.0/mod.ts";
 import "https://deno.land/std@0.184.0/dotenv/load.ts";
+import { Auth } from "./auth.ts";
+
+const app = new Application();
 
 // load config
 const server_config = Deno.env.toObject();
@@ -16,9 +19,10 @@ if (client_id == undefined || client_secret == undefined || lang == undefined ||
     Deno.exit(1);
 }
 
-// get twitch auth token
-let token: string | undefined = await get_auth();
-if (token == undefined) {
+// initialize twitch auth
+const auth = new Auth(client_id, client_secret);
+await auth.get_token();
+if (auth.token == undefined) {
     Deno.exit(1);
 }
 
@@ -38,31 +42,6 @@ function deduplicate_streams(array: Streamer[]) {
     });
 }
 
-/**
- * Get the Twitch auth token
- * @returns {String} Twitch Auth Token
-*/
-async function get_auth() {
-    const token_url = "https://id.twitch.tv/oauth2/token";
-    const headers = new Headers({ "content-type": "application/json" });
-    const api_response = await fetch(token_url, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify({
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "grant_type": "client_credentials"
-        })
-    })
-    if (api_response.ok) {
-        const token: Twitch_Api_Token = await api_response.json();
-        console.info("got a access token")
-        return token["access_token"]
-    } else {
-        console.warn("couldn`t get token")
-        return undefined
-    }
-}
 
 /**
  * Get all Streams with the set `lang` and `game_id`
@@ -75,7 +54,7 @@ async function get_streams() {
     const headers = new Headers({
         "content-type": "application/json",
         "client-id": client_id,
-        "Authorization": `Bearer ${token}`
+        "Authorization": `Bearer ${auth.token}`
     })
     let fetching = true;
     let paginator: pagination = {};
@@ -103,7 +82,8 @@ async function get_streams() {
         }
 
         if (current_streams.status == 401) {
-            token = await get_auth();
+            // get a new token
+            await auth.get_token();
         } else {
             const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
             if (tmp_stream_data == undefined) {
@@ -124,11 +104,6 @@ async function get_streams() {
     }
 }
 
-// startup fetch and interval setup
-// 1 minute interval
-await get_streams();
-const _fetch_interval: number = setInterval(get_streams.bind(this), 1 * 60 * 1000);
-
 const search_params: string[] = [
     "id",
     "user_id",
@@ -146,40 +121,47 @@ const search_params: string[] = [
     "is_mature"
 ];
 
-interface Filter {
-    [key: string]: string[];
-}
+// startup fetch and interval setup
+// 1 minute interval
+await get_streams();
+const _fetch_interval: number = setInterval(get_streams.bind(this), 1 * 60 * 1000);
 
-interface Headers {
-    [key: string]: string;
-}
+app.use((ctx: context.request, next: context.response) => {
+    // set default headers
+    ctx.response.headers.set("Access-Control-Allow-Origin", `*`);
+    ctx.response.headers.set("Access-Control-Allow-Methods", `GET`);
+    ctx.response.headers.set("X-Robots-Tag", `noindex, nofollow, noarchive, notranslate`);
 
-function handler(_req: Request): Response {
-    const params = new URL(_req.url);
-    const headers: Headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET",
+    // check if the request type is GET
+    if (ctx.request.method != "GET") {
+        ctx.response.status = Status.MethodNotAllowed;
+        return
+    } else {
+        next();
     }
+});
 
-    if (params.search == "") {
-        const valid_until = new Date();
-        valid_until.setSeconds(valid_until.getSeconds() + 600);
-        headers["Cache-Control"] = "public, max-age=600";
-        headers["content-type"] = "text/plain";
-        headers["X-Robots-Tag"] = `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`;
-        return new Response(`Please use the following filters: ${search_params}`,  { headers: headers });
+app.use((ctx: context.request) => {
+    const params: Params = helpers.getQuery(ctx, { mergeParams: true });
+
+    // we don`t want to return all streams when no filters are defined!
+    if (Object.keys(params).length == 0) {
+        ctx.response.type = "text/plain";
+        ctx.response.status = Status.BadRequest;
+        ctx.response.headers.set("Cache-Control", `public, max-age=600`);
+        ctx.response.body = `Please use the following filters: ${search_params}`;
+        return
     }
-
-    const new_params: URLSearchParams = params.searchParams;
 
     const filters: Filter = {};
+    // convert params with multiple values to array
     search_params.forEach(param => {
-        if (new_params.has(param)) {
-            filters[param] = new_params.get(param)?.split(",") ?? []
+        if (params[param]) {
+            filters[param] = params[param]?.split(",") ?? []
         }
     });
 
-    const api_response: Streamer[] = streams.filter((stream) => {
+    const api_response: Streamer[] = streams.filter((stream: Streamer) => {
         // https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
         const return_stream = Object.keys(filters).every(key => {
             for (let i=0; i<filters[key].length; i++) {
@@ -192,18 +174,16 @@ function handler(_req: Request): Response {
         return return_stream;
     });
 
-    if (api_response.length != 0) {
-        const valid_until = new Date();
-        valid_until.setSeconds(valid_until.getSeconds() + 60);
-        headers["Cache-Control"] = "public, max-age=60";
-        headers["content-type"] = "application/json";
-        headers["X-Robots-Tag"] = `nofollow, noarchive, notranslate, unavailable_after: ${valid_until.toUTCString()}`;
-        return new Response(JSON.stringify(api_response), { headers: headers });
-    } else {
-        headers["Cache-Control"] = "public, max-age=60";
-        headers["content-type"] = "application/json";
-        return new Response(JSON.stringify([]), { headers: headers });
-    }
-}
+    ctx.response.type = "json";
+    ctx.response.headers.set("Cache-Control", `public, max-age=60`);
 
-serve(handler, { listen_port });
+    if (api_response.length != 0) {
+        ctx.response.body = JSON.stringify(api_response);
+        return
+    } else {
+        ctx.response.body = "[]";
+        return
+    }
+});
+
+await app.listen({ port: listen_port });
