@@ -5,7 +5,7 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 1. Install [deno](https://github.com/denoland)
 2. Copy ```.env.example``` to ```.env```
 3. Fill in the values in ```.env```
-4. Run ```deno run --allow-net --allow-read --allow-env .\index.ts```
+4. Run ```deno task dev```
 
 # Fly.io
 (Do the setup before!)  
