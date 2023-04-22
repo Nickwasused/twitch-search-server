@@ -22,9 +22,6 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # Instances
 
-These instances are rate limited by the Cloudflare WAF. You can request 10 searches every 10 seconds.  
-If you hit the rate limit, then you get a 429 response with the following content: `{"status": "rate-limit"}`
-
 | Instance | User | Language | Game | Uptime
 | - | - | - | - | -
 | https://twitch-search-server-de-gta5-1.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5) | ![Uptime](https://img.shields.io/uptimerobot/ratio/m791355715-cb0f5288f833744c7fb2b816?style=for-the-badge)
