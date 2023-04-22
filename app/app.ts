@@ -137,6 +137,7 @@ app.use((ctx: context.request, next: context.response) => {
 		ctx.response.status = Status.MethodNotAllowed;
 		return;
 	} else {
+        ctx.response.status = Status.OK;
 		next();
 	}
 });
@@ -147,7 +148,6 @@ app.use((ctx: context.request) => {
 	// we don`t want to return all streams when no filters are defined!
 	if (Object.keys(params).length == 0) {
 		ctx.response.type = 'text/plain';
-		ctx.response.status = Status.BadRequest;
 		ctx.response.headers.set('Cache-Control', `public, max-age=600`);
 		ctx.response.body = `Please use the following filters: ${search_params}`;
 		return;
