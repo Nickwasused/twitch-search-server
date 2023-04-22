@@ -106,6 +106,7 @@ const search_params: string[] = [
     "language",
     "thumbnail_url",
     "tag_ids",
+    "tags",
     "is_mature"
 ];
 

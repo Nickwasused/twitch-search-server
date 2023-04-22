@@ -12,6 +12,7 @@ type Streamer = {
     language: string;
     thumbnail_url: string;
     tag_ids: Array<string>;
+    tags: Array<string>;
     is_mature: boolean;
 }
 
