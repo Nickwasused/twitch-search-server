@@ -2,7 +2,7 @@
 FROM denoland/deno:alpine-1.29.1 AS builder
 WORKDIR /app
 
-COPY *.ts /app/
+COPY app/*.ts /app/
 COPY deno.json /app
 RUN deno task build-linux
 
