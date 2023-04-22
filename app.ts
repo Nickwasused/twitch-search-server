@@ -2,25 +2,14 @@
 import { Application, helpers, context, Status } from "https://deno.land/x/oak@v12.2.0/mod.ts";
 import "https://deno.land/std@0.184.0/dotenv/load.ts";
 import { Auth } from "./auth.ts";
+import { Config } from "./config.ts";
 
 const app = new Application();
-
 // load config
-const server_config = Deno.env.toObject();
-const client_id: string = server_config["CLIENT_ID"];
-const client_secret: string = server_config["CLIENT_SECRET"];
-const lang: string = server_config["TWITCH_LANG"];
-const game_id: string = server_config["GAME_ID"];
-const listen_port: number = parseInt(server_config["PORT"] ?? "8000");
-
-// check config
-if (client_id == undefined || client_secret == undefined || lang == undefined || game_id == undefined) {
-    console.error("missing config");
-    Deno.exit(1);
-}
-
+const config = new Config();
 // initialize twitch auth
-const auth = new Auth(client_id, client_secret);
+const auth = new Auth(config.client_id, config.client_secret);
+
 await auth.get_token();
 if (auth.token == undefined) {
     Deno.exit(1);
@@ -42,7 +31,6 @@ function deduplicate_streams(array: Streamer[]) {
     });
 }
 
-
 /**
  * Get all Streams with the set `lang` and `game_id`
  * @returns {array<Streamer>} Array of Streamers
@@ -53,14 +41,14 @@ async function get_streams() {
     const tempstreams: Streamer[] = [];
     const headers = new Headers({
         "content-type": "application/json",
-        "client-id": client_id,
+        "client-id": config.client_id,
         "Authorization": `Bearer ${auth.token}`
     })
     let fetching = true;
     let paginator: pagination = {};
     
     while (fetching) {
-        let url = `${streams_url}?first=100&type=live&language=${lang}&game_id=${game_id}`;
+        let url = `${streams_url}?first=100&type=live&language=${config.lang}&game_id=${config.game_id}`;
         if (paginator.cursor) {
             url = `${url}&after=${paginator.cursor}`;
         }
@@ -73,26 +61,26 @@ async function get_streams() {
             })
         } catch (error) {
             console.error(error);
-        }
-        
-        if (current_streams == undefined) {
             fetching = false;
-            console.error(`error while fetching streams!`);
             continue
         }
-
+        
         if (current_streams.status == 401) {
             // get a new token
             await auth.get_token();
+            continue
+        } 
+
+        const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
+        if (tmp_stream_data == undefined) {
+            fetching = false;
+            console.error(`done fetching ${tempstreams.length} streams, but with an error!`);
+            streams = tempstreams;
         } else {
-            const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
-            if (tmp_stream_data == undefined) {
-                fetching = false;
-                console.error(`done fetching ${tempstreams.length} streams, but with an error!`);
-                streams = tempstreams;
-                continue
-            }
+            // merge streams
             tempstreams.splice(tempstreams.length, 0, ...tmp_stream_data.data);
+
+            // if there are no more streams
             if (tmp_stream_data.pagination.cursor == undefined || tmp_stream_data.pagination.cursor == "IA") {
                 fetching = false;
                 streams = deduplicate_streams(tempstreams);
@@ -186,4 +174,4 @@ app.use((ctx: context.request) => {
     }
 });
 
-await app.listen({ port: listen_port });
+await app.listen({ port: config.listen_port });
