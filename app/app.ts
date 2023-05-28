@@ -1,9 +1,9 @@
 // @deno-types="./app.d.ts"
-import { Server } from "https://deno.land/std@0.189.0/http/server.ts";
+import { Server } from 'https://deno.land/std@0.189.0/http/server.ts';
 import 'https://deno.land/std@0.189.0/dotenv/load.ts';
-import { GraphQLHTTP } from "https://deno.land/x/gql@1.1.2/mod.ts";
-import { makeExecutableSchema } from "https://deno.land/x/graphql_tools@0.0.2/mod.ts";
-import { gql } from "https://deno.land/x/graphql_tag@0.0.1/mod.ts";
+import { GraphQLHTTP } from 'https://deno.land/x/gql@1.1.2/mod.ts';
+import { makeExecutableSchema } from 'https://deno.land/x/graphql_tools@0.0.2/mod.ts';
+import { gql } from 'https://deno.land/x/graphql_tag@0.1.1/mod.ts';
 import { Auth } from './auth.ts';
 import { Config } from './config.ts';
 
@@ -121,7 +121,7 @@ const Streamers = async (args: any) => {
 	const params = args;
 
 	if (Object.keys(params).length == 0) {
-		return streams
+		return streams;
 	}
 
 	const filters: Filter = {};
@@ -160,9 +160,7 @@ const _fetch_interval: number = setInterval(
 
 const typeDefs = gql`
 	type Query {
-		Streamers(id: ID, user_id: String, user_id: String, user_name: String, game_id: String,
-			game_name: String, type: String, title: String, viewer_count: Int, started_at: String,
-			language: String, thumbnail_url: String, is_mature: Boolean): [Streamer!]
+		Streamers(id: ID, user_id: String, user_login: String, user_name: String, game_id: String, game_name: String, type: String, title: String, viewer_count: Int, started_at: String, language: String, thumbnail_url: String, is_mature: Boolean): [Streamer!]
   	}
 
 	type Streamer {
@@ -194,16 +192,31 @@ const schema = makeExecutableSchema({ resolvers, typeDefs });
 
 const server = new Server({
 	handler: async (req: any) => {
-	  const { pathname } = new URL(req.url);
-  
-	  return pathname === "/graphql"
-		? await GraphQLHTTP<Request>({
-		  schema,
-		  graphiql: true,
-		})(req)
-		: new Response("Not Found", { status: 404 });
+		const { pathname } = new URL(req.url);
+
+		let res: Response;
+
+		if (pathname === '/graphql') {
+			res = req.method === 'OPTIONS'
+				? new Response(undefined, { status: 204, headers: { Allow: 'OPTIONS, GET, POST' } })
+				: await GraphQLHTTP<Request>({
+					schema,
+					graphiql: true,
+				})(req);
+		} else {
+			res = req.method === 'OPTIONS'
+				? new Response(undefined, { status: 204, headers: { Allow: '*' } })
+				: new Response('Not Found', { status: 404 });
+		}
+
+		res.headers.append('access-control-allow-origin', '*');
+		res.headers.append('access-control-allow-headers', 'Origin, Host, Content-Type, Accept');
+
+		return res;
 	},
 	port: 8000,
 });
 
 server.listenAndServe();
+
+console.log(`☁  Started on http://localhost:8000`);
