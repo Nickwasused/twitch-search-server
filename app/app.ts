@@ -117,7 +117,7 @@ const search_params: string[] = [
 	'is_mature',
 ];
 
-const Streamers = async (args: any) => {
+const Streamers = async (args: any, only_viewers: boolean = false, only_streamers: boolean = false) => {
 	const params = args;
 
 	if (Object.keys(params).length == 0) {
@@ -132,7 +132,7 @@ const Streamers = async (args: any) => {
 		}
 	});
 
-	return streams.filter((stream: Streamer) => {
+	const streamers =  streams.filter((stream: Streamer) => {
 		// https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
 		const return_stream = Object.keys(filters).every((key) => {
 			for (let i = 0; i < filters[key].length; i++) {
@@ -148,6 +148,16 @@ const Streamers = async (args: any) => {
 		});
 		return return_stream;
 	});
+
+	if (!only_viewers && !only_streamers) {
+		return streamers
+	} else if (only_viewers) {
+		const viewerCount = streamers.map(obj => obj.viewer_count);
+		const totalViewerCount = viewerCount.reduce((acc, count) => acc + count, 0);
+		return totalViewerCount
+	} else if (only_streamers) {
+		return streamers.length
+	}
 };
 
 // startup fetch and interval setup
@@ -161,6 +171,8 @@ const _fetch_interval: number = setInterval(
 const typeDefs = gql`
 	type Query {
 		Streamers(id: ID, user_id: String, user_login: String, user_name: String, game_id: String, game_name: String, type: String, title: String, viewer_count: Int, started_at: String, language: String, thumbnail_url: String, is_mature: Boolean): [Streamer!]
+		getViewerCount(id: ID, user_id: String, user_login: String, user_name: String, game_id: String, game_name: String, type: String, title: String, viewer_count: Int, started_at: String, language: String, thumbnail_url: String, is_mature: Boolean): Int
+		getStreamerCount(id: ID, user_id: String, user_login: String, user_name: String, game_id: String, game_name: String, type: String, title: String, viewer_count: Int, started_at: String, language: String, thumbnail_url: String, is_mature: Boolean): Int
   	}
 
 	type Streamer {
@@ -184,7 +196,9 @@ const typeDefs = gql`
 
 const resolvers = {
 	Query: {
-		Streamers: (_: any, args: any) => Streamers(args),
+		Streamers: (_: any, args: any) => Streamers(args, false, false),
+		getViewerCount: (_: any, args: any) => Streamers(args, true, false),
+		getStreamerCount: (_: any, args: any) => Streamers(args, false, true),
 	},
 };
 
