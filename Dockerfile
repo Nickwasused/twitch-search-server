@@ -1,5 +1,5 @@
 # build step
-FROM denoland/deno:alpine-1.29.1 AS builder
+FROM denoland/deno:alpine-1.34.0 AS builder
 WORKDIR /app
 
 COPY app/*.ts /app/
@@ -18,5 +18,5 @@ WORKDIR /app
 EXPOSE 8000
 
 COPY --from=builder "/app/twitch" "/app/twitch"
-RUN chmod +x ./twitch
-ENTRYPOINT ["./twitch"]
+RUN chmod +x /app/twitch
+ENTRYPOINT ["/app/twitch"]
