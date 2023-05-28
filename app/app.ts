@@ -1,6 +1,6 @@
 // @deno-types="./app.d.ts"
-import { Server } from "https://deno.land/std@0.166.0/http/server.ts";
-import 'https://deno.land/std@0.184.0/dotenv/load.ts';
+import { Server } from "https://deno.land/std@0.189.0/http/server.ts";
+import 'https://deno.land/std@0.189.0/dotenv/load.ts';
 import { GraphQLHTTP } from "https://deno.land/x/gql@1.1.2/mod.ts";
 import { makeExecutableSchema } from "https://deno.land/x/graphql_tools@0.0.2/mod.ts";
 import { gql } from "https://deno.land/x/graphql_tag@0.0.1/mod.ts";
