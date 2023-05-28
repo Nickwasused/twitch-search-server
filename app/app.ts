@@ -1,10 +1,12 @@
 // @deno-types="./app.d.ts"
-import { Application, context, helpers, Status } from 'https://deno.land/x/oak@v12.2.0/mod.ts';
+import { Server } from "https://deno.land/std@0.166.0/http/server.ts";
 import 'https://deno.land/std@0.184.0/dotenv/load.ts';
+import { GraphQLHTTP } from "https://deno.land/x/gql@1.1.2/mod.ts";
+import { makeExecutableSchema } from "https://deno.land/x/graphql_tools@0.0.2/mod.ts";
+import { gql } from "https://deno.land/x/graphql_tag@0.0.1/mod.ts";
 import { Auth } from './auth.ts';
 import { Config } from './config.ts';
 
-const app = new Application();
 // load config
 const config = new Config();
 // initialize twitch auth
@@ -115,42 +117,11 @@ const search_params: string[] = [
 	'is_mature',
 ];
 
-// startup fetch and interval setup
-// 1 minute interval
-await get_streams();
-const _fetch_interval: number = setInterval(
-	get_streams.bind(this),
-	1 * 60 * 1000,
-);
+const Streamers = async (args: any) => {
+	const params = args;
 
-app.use((ctx: context.request, next: context.response) => {
-	// set default headers
-	ctx.response.headers.set('Access-Control-Allow-Origin', `*`);
-	ctx.response.headers.set('Access-Control-Allow-Methods', `GET`);
-	ctx.response.headers.set(
-		'X-Robots-Tag',
-		`noindex, nofollow, noarchive, notranslate`,
-	);
-
-	// check if the request type is GET
-	if (ctx.request.method != 'GET') {
-		ctx.response.status = Status.MethodNotAllowed;
-		return;
-	} else {
-        ctx.response.status = Status.OK;
-		next();
-	}
-});
-
-app.use((ctx: context.request) => {
-	const params: Params = helpers.getQuery(ctx, { mergeParams: true });
-
-	// we don`t want to return all streams when no filters are defined!
 	if (Object.keys(params).length == 0) {
-		ctx.response.type = 'text/plain';
-		ctx.response.headers.set('Cache-Control', `public, max-age=600`);
-		ctx.response.body = `Please use the following filters: ${search_params}`;
-		return;
+		return streams
 	}
 
 	const filters: Filter = {};
@@ -161,7 +132,7 @@ app.use((ctx: context.request) => {
 		}
 	});
 
-	const api_response: Streamer[] = streams.filter((stream: Streamer) => {
+	return streams.filter((stream: Streamer) => {
 		// https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
 		const return_stream = Object.keys(filters).every((key) => {
 			for (let i = 0; i < filters[key].length; i++) {
@@ -177,17 +148,62 @@ app.use((ctx: context.request) => {
 		});
 		return return_stream;
 	});
+};
 
-	ctx.response.type = 'json';
-	ctx.response.headers.set('Cache-Control', `public, max-age=60`);
+// startup fetch and interval setup
+// 1 minute interval
+await get_streams();
+const _fetch_interval: number = setInterval(
+	get_streams.bind(this),
+	1 * 60 * 1000,
+);
 
-	if (api_response.length != 0) {
-		ctx.response.body = JSON.stringify(api_response);
-		return;
-	} else {
-		ctx.response.body = '[]';
-		return;
+const typeDefs = gql`
+	type Query {
+		Streamers(id: ID, user_id: String, user_id: String, user_name: String, game_id: String,
+			game_name: String, type: String, title: String, viewer_count: Int, started_at: String,
+			language: String, thumbnail_url: String, is_mature: Boolean): [Streamer!]
+  	}
+
+	type Streamer {
+		id: ID!
+		user_id: String!
+		user_login: String!
+		user_name: String!
+		game_id: String
+		game_name: String
+		type: String
+		title: String
+		viewer_count: Int
+		started_at: String
+		language: String
+		thumbnail_url: String
+		tag_ids: [String!]
+		tags: [String!]
+		is_mature: Boolean
 	}
+`;
+
+const resolvers = {
+	Query: {
+		Streamers: (_: any, args: any) => Streamers(args),
+	},
+};
+
+const schema = makeExecutableSchema({ resolvers, typeDefs });
+
+const server = new Server({
+	handler: async (req: any) => {
+	  const { pathname } = new URL(req.url);
+  
+	  return pathname === "/graphql"
+		? await GraphQLHTTP<Request>({
+		  schema,
+		  graphiql: true,
+		})(req)
+		: new Response("Not Found", { status: 404 });
+	},
+	port: 8000,
 });
 
-await app.listen({ port: config.listen_port });
+server.listenAndServe();
