@@ -18,14 +18,13 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # API Docs
 
-[https://twitch-search-server-docs.nickwasused.com/](https://twitch-search-server-docs.nickwasused.com/)
+The graphql interface is at `/graphql` e.g. [https://tts-de-gta5.nickwasused.com/graphql](https://tts-de-gta5.nickwasused.com/graphql)
 
 # Instances
 
 | Instance | User | Language | Game
 | - | - | - | -
-| https://twitch-search-server-de-gta5-1.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5)
+| https://tts-de-gta5.nickwasused.com/graphql | Nickwasused | DE | 32982 (GTA 5)
 
-The graphql interface is at `/graphql` e.g. [https://twitch-search-server-de-gta5-1.nickwasused.com/graphql](https://twitch-search-server-de-gta5-1.nickwasused.com/graphql)
 
 [https://uptime.nickwasused.com/status/tss](https://uptime.nickwasused.com/status/tss)
