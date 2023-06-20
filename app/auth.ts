@@ -1,5 +1,3 @@
-import * as log from "https://deno.land/std@0.192.0/log/mod.ts";
-
 type Twitch_Api_Token = {
 	access_token: string;
 	expires_in: number;
@@ -31,10 +29,10 @@ export class Auth {
 		});
 		if (api_response.ok) {
 			const token: Twitch_Api_Token = await api_response.json();
-			log.info('got a access token');
+			console.info('got a access token');
 			this.token = token['access_token'];
 		} else {
-			log.critical('couldn`t get token');
+			console.warn('couldn`t get token');
 		}
 	}
 }
