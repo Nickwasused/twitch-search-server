@@ -1,11 +1,12 @@
 // @deno-types="./app.d.ts"
-import { Server } from 'https://deno.land/std@0.189.0/http/server.ts';
-import 'https://deno.land/std@0.189.0/dotenv/load.ts';
+import { Server } from 'https://deno.land/std@0.192.0/http/server.ts';
+import 'https://deno.land/std@0.192.0/dotenv/load.ts';
 import { GraphQLHTTP } from 'https://deno.land/x/gql@1.1.2/mod.ts';
 import { makeExecutableSchema } from 'https://deno.land/x/graphql_tools@0.0.2/mod.ts';
 import { gql } from 'https://deno.land/x/graphql_tag@0.1.1/mod.ts';
 import { Auth } from './auth.ts';
 import { Config } from './config.ts';
+import * as log from "https://deno.land/std@0.192.0/log/mod.ts";
 
 // load config
 const config = new Config();
@@ -62,7 +63,7 @@ async function get_streams() {
 				headers: headers,
 			});
 		} catch (error) {
-			console.error(error);
+			log.error(error);
 			fetching = false;
 			continue;
 		}
@@ -76,7 +77,7 @@ async function get_streams() {
 		const tmp_stream_data: Twitch_Api_Streams = await current_streams.json();
 		if (tmp_stream_data == undefined) {
 			fetching = false;
-			console.error(
+			log.error(
 				`done fetching ${tempstreams.length} streams, but with an error!`,
 			);
 			streams = tempstreams;
@@ -91,7 +92,7 @@ async function get_streams() {
 			) {
 				fetching = false;
 				streams = deduplicate_streams(tempstreams);
-				console.info(`done fetching ${streams.length} streams`);
+				log.info(`done fetching ${streams.length} streams`);
 			} else {
 				paginator = tmp_stream_data.pagination;
 			}
@@ -233,4 +234,4 @@ const server = new Server({
 
 server.listenAndServe();
 
-console.log(`☁  Started on http://localhost:8000`);
+log.info(`☁  Started on http://localhost:8000`);
