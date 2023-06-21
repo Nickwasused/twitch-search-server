@@ -6,7 +6,10 @@ import { makeExecutableSchema } from 'https://deno.land/x/graphql_tools@0.0.2/mo
 import { gql } from 'https://deno.land/x/graphql_tag@0.1.1/mod.ts';
 import { Auth } from './auth.ts';
 import { Config } from './config.ts';
+import { Cache } from './cache.ts';
 import * as log from "https://deno.land/std@0.192.0/log/mod.ts";
+import * as hash from 'npm:object-hash';
+import { stringify } from 'https://deno.land/std@0.192.0/dotenv/mod.ts';
 
 // load config
 const config = new Config();
@@ -18,7 +21,9 @@ if (auth.token == undefined) {
 	Deno.exit(1);
 }
 
+const cache = new Cache();
 let streams: Streamer[] = [];
+let valid_until: Date;
 
 /**
  * Remove duplicates from a Streams Array
@@ -93,6 +98,9 @@ async function get_streams() {
 				fetching = false;
 				streams = deduplicate_streams(tempstreams);
 				log.info(`done fetching ${streams.length} streams`);
+				let tmp_valid = new Date();
+				tmp_valid.setMinutes(tmp_valid.getMinutes() + 1);
+				valid_until = tmp_valid;
 			} else {
 				paginator = tmp_stream_data.pagination;
 			}
@@ -133,6 +141,16 @@ const Streamers = async (args: any, only_viewers: boolean = false, only_streamer
 		}
 	});
 
+	let tmp_hash = JSON.stringify({
+		"f": filters,
+		"v": only_viewers,
+		"s": only_streamers
+	});
+	
+	// check if we have cached data
+	let cached_item = cache.check_item(tmp_hash);
+	if (cached_item) { return cached_item; }
+
 	const streamers =  streams.filter((stream: Streamer) => {
 		// https://stackoverflow.com/questions/52489741/filter-json-object-array-on-multiple-values-or-arguments-javascript
 		const return_stream = Object.keys(filters).every((key) => {
@@ -151,12 +169,17 @@ const Streamers = async (args: any, only_viewers: boolean = false, only_streamer
 	});
 
 	if (!only_viewers && !only_streamers) {
+		cache.add_item(tmp_hash, valid_until, streamers);
 		return streamers
 	} else if (only_viewers) {
+		tmp_hash.concat("viewers");
 		const viewerCount = streamers.map(obj => obj.viewer_count);
 		const totalViewerCount = viewerCount.reduce((acc, count) => acc + count, 0);
+		cache.add_item(tmp_hash, valid_until, totalViewerCount);
 		return totalViewerCount
 	} else if (only_streamers) {
+		tmp_hash.concat("streamer_count");
+		cache.add_item(tmp_hash, valid_until, streamers.length);
 		return streamers.length
 	}
 };

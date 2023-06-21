@@ -770,5 +770,16 @@
     "https://esm.sh/v124/xss@1.0.14/deno/xss.mjs": "c580a85ebb41c8b1c2b7cbce6d9461c13ca3ed34be7d2f5913ed41c4edac0229",
     "https://esm.sh/xss@1.0.14?no-check": "ecdc0b2b22cbbde7a7ee27868f42635e347dcc5c95f588320ad5ad18d22c19e1",
     "https://raw.githubusercontent.com/jshttp/mime-db/v1.52.0/db.json": "85c8e1ba609079947c8df83c092900ab0226e1d7b60e5e7105fb7dd701833263"
+  },
+  "npm": {
+    "specifiers": {
+      "object-hash": "object-hash@3.0.0"
+    },
+    "packages": {
+      "object-hash@3.0.0": {
+        "integrity": "sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==",
+        "dependencies": {}
+      }
+    }
   }
 }
