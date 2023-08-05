@@ -1,15 +1,13 @@
 // @deno-types="./app.d.ts"
-import { Server } from 'https://deno.land/std@0.192.0/http/server.ts';
-import 'https://deno.land/std@0.192.0/dotenv/load.ts';
-import { GraphQLHTTP } from 'https://deno.land/x/gql@1.1.2/mod.ts';
-import { makeExecutableSchema } from 'https://deno.land/x/graphql_tools@0.0.2/mod.ts';
-import { gql } from 'https://deno.land/x/graphql_tag@0.1.1/mod.ts';
+import { Server } from 'https://deno.land/std@0.197.0/http/server.ts';
+import 'https://deno.land/std@0.197.0/dotenv/load.ts';
+import * as log from "https://deno.land/std@0.197.0/log/mod.ts";
+import { GraphQLHTTP } from 'https://deno.land/x/gql@1.2.4/mod.ts';
+import { makeExecutableSchema } from 'npm:@graphql-tools/schema@10.0.0'
+import { gql } from 'https://deno.land/x/graphql_tag@0.1.2/mod.ts';
 import { Auth } from './auth.ts';
 import { Config } from './config.ts';
 import { Cache } from './cache.ts';
-import * as log from "https://deno.land/std@0.192.0/log/mod.ts";
-import * as hash from 'npm:object-hash';
-import { stringify } from 'https://deno.land/std@0.192.0/dotenv/mod.ts';
 
 // load config
 const config = new Config();

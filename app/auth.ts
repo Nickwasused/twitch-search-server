@@ -1,4 +1,4 @@
-import * as log from "https://deno.land/std@0.192.0/log/mod.ts";
+import * as log from "https://deno.land/std@0.197.0/log/mod.ts";
 
 type Twitch_Api_Token = {
 	access_token: string;
