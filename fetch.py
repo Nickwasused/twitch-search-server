@@ -84,5 +84,12 @@ def get_streamers():
     for item in streamers:
         tmp_converted_streams.append(Streamer(**item))
 
+    deduplicated_streamers = {}
+
+    for streamer in tmp_converted_streams:
+        deduplicated_streamers[streamer.id] = streamer
+
+    streamers_data = list(deduplicated_streamers.values())
+
     logging.info(f"fetched {len(streamers)} streams")
-    return tmp_converted_streams
+    return streamers_data
