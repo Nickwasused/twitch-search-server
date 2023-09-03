@@ -1,17 +1,16 @@
-CREATE TABLE IF NOT EXISTS streamers (
-    id TEXT PRIMARY KEY,
-    user_id TEXT,
-    user_login TEXT,
-    user_name TEXT,
-    game_id TEXT,
-    game_name TEXT,
-    type TEXT,
-    title TEXT,
-    viewer_count INTEGER,
-    started_at TEXT,
-    language TEXT,
-    thumbnail_url TEXT,
-    tag_ids TEXT,
-    tags TEXT,
-    is_mature INTEGER
+CREATE VIRTUAL TABLE IF NOT EXISTS streamers USING FTS5(
+    id,
+    user_id,
+    user_login,
+    user_name,
+    game_id,
+    game_name,
+    type,
+    title,
+    viewer_count,
+    started_at,
+    language,
+    thumbnail_url,
+    tags,
+    is_mature
 );

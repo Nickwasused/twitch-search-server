@@ -1,11 +1,10 @@
-import requests
-
-from auth import get_token
+#!/usr/bin/env python3
 from dataclasses import dataclass
 from dotenv import load_dotenv
-import os
+from auth import get_token
+import requests
 import logging
-
+import os
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()

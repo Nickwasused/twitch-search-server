@@ -1,9 +1,8 @@
-from fetch import get_streamers, Streamer
-import sqlite3
-from flask import Flask, render_template, request, abort, g
-from waitress import serve
-import argparse
+#!/usr/bin/env python3
 from flask_apscheduler import APScheduler
+from flask import Flask, request
+from fetch import get_streamers
+import sqlite3
 
 
 class Config:
@@ -26,35 +25,34 @@ database.commit()
 
 @app.route("/")
 def index():
-    search_title = request.args.get("title")
-    cursor.execute(
-        '''
-        SELECT *
-        FROM streamers
-        WHERE title LIKE '%'||?||'%'
-        ''',
-        (search_title,)
-    )
+    search_query = request.args.get("search")
 
-    result = cursor.fetchall()
-    new_result = [{
-        "id": entry[0],
-        "user_id": entry[1],
-        "user_login": entry[2],
-        "user_name": entry[3],
-        "game_id": entry[4],
-        "game_name": entry[5],
-        "type": entry[6],
-        "title": entry[7],
-        "viewer_count": entry[8],
-        "started_at": entry[9],
-        "language": entry[10],
-        "thumbnail_url": entry[11],
-        "tag_ids": entry[12],
-        "tags": entry[13],
-        "is_mature": entry[14],
-    } for entry in result]
-    return new_result
+    if search_query:
+        cursor.execute('''
+            SELECT * FROM streamers WHERE streamers MATCH ?
+        ''', (search_query,))
+
+        result = cursor.fetchall()
+
+        new_result = [{
+            "id": entry[0],
+            "user_id": entry[1],
+            "user_login": entry[2],
+            "user_name": entry[3],
+            "game_id": entry[4],
+            "game_name": entry[5],
+            "type": entry[6],
+            "title": entry[7],
+            "viewer_count": entry[8],
+            "started_at": entry[9],
+            "language": entry[10],
+            "thumbnail_url": entry[11],
+            "tags": entry[12],
+            "is_mature": entry[13],
+        } for entry in result]
+        return new_result
+    else:
+        return "Search by adding the url parameter 'search'. E.g. ?search=deutsch"
 
 
 scheduler = APScheduler()
@@ -76,16 +74,15 @@ def update_streamers():
             streamer.id, streamer.user_id, streamer.user_login, streamer.user_name,
             streamer.game_id, streamer.game_name, streamer.type, streamer.title,
             streamer.viewer_count, streamer.started_at, streamer.language,
-            streamer.thumbnail_url, '|'.join(streamer.tag_ids),
-            '|'.join(str(tag) for tag in tmp_tags),
+            streamer.thumbnail_url, ','.join(str(tag) for tag in tmp_tags),
             int(streamer.is_mature)
         )
         values.append(value_tuple)
 
     cursor.executemany("""INSERT INTO streamers (
     id, user_id, user_login, user_name, game_id, game_name, type, title,
-    viewer_count, started_at, language, thumbnail_url, tag_ids, tags, is_mature) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
+    viewer_count, started_at, language, thumbnail_url, tags, is_mature) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", values)
 
     database.commit()
 
@@ -94,13 +91,4 @@ scheduler.start()
 scheduler.run_job("update_streamers")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="frontend")
-    parser.add_argument("-w", "--waitress", help="Define if we want to use waitress for the web server.",
-                        action="store_true")
-    args = parser.parse_args()
-
-    if args.waitress:
-        serve(app, port=8000, host="127.0.0.1")
-    else:
-        # https://werkzeug.palletsprojects.com/en/2.2.x/serving/#werkzeug.serving.run_simple
-        app.run(debug=True)
+    app.run()
