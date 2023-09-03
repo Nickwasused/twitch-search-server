@@ -2,10 +2,11 @@
 The reason to create this API was because of this: https://discuss.dev.twitch.tv/t/search-by-title-not-possible/33868  
 
 # setup
-1. Install [deno](https://github.com/denoland)
-2. Copy ```.env.example``` to ```.env```
-3. Fill in the values in ```.env```
-4. Run ```deno task dev```
+1. Install python3
+2. Install the requirements ```pip3 install -r requirements.txt```
+3. Copy ```.env.example``` to ```.env```
+4. Fill in the values in ```.env```
+5. Run ```python app.py```
 
 # Fly.io
 (Do the setup before!)  
@@ -18,13 +19,13 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # API Docs
 
-The graphql interface is at `/graphql` e.g. [https://tts-de-gta5.nickwasused.com/graphql](https://tts-de-gta5.nickwasused.com/graphql)
+The search is available at the root "/". You can search using the argument "search". Example "https://tts-de-gta5.nickwasused.com/?search=deutsch"
 
 # Instances
 
 | Instance | User | Language | Game
 | - | - | - | -
-| https://tts-de-gta5.nickwasused.com/graphql | Nickwasused | DE | 32982 (GTA 5)
+| https://tts-de-gta5.nickwasused.com/ | Nickwasused | DE | 32982 (GTA 5)
 
 
 [https://uptime.nickwasused.com/status/tss](https://uptime.nickwasused.com/status/tss)
