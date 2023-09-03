@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask_apscheduler import APScheduler
-from flask import Flask, request
+from flask import Flask, request, Response
 from fetch import get_streamers
 import sqlite3
 
@@ -53,6 +53,12 @@ def index():
         return new_result
     else:
         return "Search by adding the url parameter 'search'. E.g. ?search=deutsch"
+
+
+@app.after_request
+def security_headers(response: Response) -> Response:
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 scheduler = APScheduler()
