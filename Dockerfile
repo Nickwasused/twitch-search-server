@@ -1,22 +1,12 @@
-# build step
-FROM denoland/deno:alpine-1.34.1 AS builder
-WORKDIR /app
+FROM python:alpine3.18
 
-COPY app/*.ts /app/
-COPY deno.json /app
-RUN deno task build-linux
+WORKDIR /usr/src/app
 
-# runner image
-FROM alpine:latest as runner
-# copy some stuff
-# https://github.com/denoland/deno_docker/issues/240#issuecomment-1205550359
-COPY --from=builder /usr/glibc-compat /usr/glibc-compat
-COPY --from=builder /lib/* /lib/
-COPY --from=builder /lib64/* /lib64/
-COPY --from=builder /usr/lib/* /usr/lib/
-WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
 EXPOSE 8000
 
-COPY --from=builder "/app/twitch" "/app/twitch"
-RUN chmod +x /app/twitch
-ENTRYPOINT ["/app/twitch"]
+CMD [ "gunicorn", "app:app", "--bind=0.0.0.0" ]
