@@ -29,6 +29,21 @@ class Streamer:
     tags: [str]
     is_mature: bool
 
+    def __hash__(self):
+        return int(self.id)
+
+
+# https://stackoverflow.com/a/282589
+def remove_duplicates(seq):
+    seen = {}
+    pos = 0
+    for item in seq:
+        if item not in seen:
+            seen[item] = True
+            seq[pos] = item
+            pos += 1
+    del seq[pos:]
+
 
 def get_streamers():
     global token
@@ -73,7 +88,8 @@ def get_streamers():
             streamers = [*streamers, *tmp_fetched_streams["data"]]
 
             if tmp_fetched_streams["pagination"] == {} or "pagination" in tmp_fetched_streams \
-                    and not tmp_fetched_streams["pagination"]["cursor"] or tmp_fetched_streams["pagination"]["cursor"] == "IA":
+                    and not tmp_fetched_streams["pagination"]["cursor"] or \
+                    tmp_fetched_streams["pagination"]["cursor"] == "IA":
                 fetching = False
                 continue
             else:
@@ -83,12 +99,7 @@ def get_streamers():
     for item in streamers:
         tmp_converted_streams.append(Streamer(**item))
 
-    deduplicated_streamers = {}
+    remove_duplicates(tmp_converted_streams)
 
-    for streamer in tmp_converted_streams:
-        deduplicated_streamers[streamer.id] = streamer
-
-    streamers_data = list(deduplicated_streamers.values())
-
-    logging.info(f"fetched {len(streamers)} streams")
-    return streamers_data
+    logging.info(f"fetched {len(tmp_converted_streams)} streams")
+    return tmp_converted_streams

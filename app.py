@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask_apscheduler import APScheduler
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
 from fetch import get_streamers
 import sqlite3
 
@@ -15,6 +15,7 @@ app.config.from_object(Config())
 
 # Fixme: There should be a better solution!
 database = sqlite3.connect(":memory:", check_same_thread=False)
+database.row_factory = sqlite3.Row
 cursor = database.cursor()
 with open('schema.sql', 'r') as sql_file:
     create_table_sql = sql_file.read()
@@ -34,23 +35,9 @@ def index():
 
         result = cursor.fetchall()
 
-        new_result = [{
-            "id": entry[0],
-            "user_id": entry[1],
-            "user_login": entry[2],
-            "user_name": entry[3],
-            "game_id": entry[4],
-            "game_name": entry[5],
-            "type": entry[6],
-            "title": entry[7],
-            "viewer_count": entry[8],
-            "started_at": entry[9],
-            "language": entry[10],
-            "thumbnail_url": entry[11],
-            "tags": entry[12],
-            "is_mature": entry[13],
-        } for entry in result]
-        return new_result
+        # convert the sqlite3 output to json
+        # https://stackoverflow.com/a/18054751
+        return jsonify([dict(x) for x in result])
     else:
         return "Search by adding the url parameter 'search'. E.g. ?search=deutsch"
 
