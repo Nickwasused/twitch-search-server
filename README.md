@@ -4,6 +4,7 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 # setup
 1. Install python3
 2. Install the requirements ```pip3 install -r requirements.txt```
+3. Install uvicorn ```pip3 install 'uvicorn[standard]'```
 3. Copy ```.env.example``` to ```.env```
 4. Fill in the values in ```.env```
 5. Run ```python app.py```
@@ -19,7 +20,7 @@ The reason to create this API was because of this: https://discuss.dev.twitch.tv
 
 # API Docs
 
-The search is available at the root "/". You can search using the argument "search". Example "https://tts-de-gta5.nickwasused.com/?search=deutsch"
+The search is available at the "/docs" path.
 
 # Instances
 
