@@ -26,7 +26,7 @@ class Streamer:
     started_at: str
     language: str
     thumbnail_url: str
-    tags: [str]
+    tags: list[str]
     is_mature: bool
 
     def __hash__(self):
@@ -102,6 +102,7 @@ class Handler:
 
     def filter_streams(self, search: dict):
         filtered_streamers = []
+        print(search)
         for streamer in self.streamers:
             match = all(
                 (field == 'title' and re.search(value, getattr(streamer, field, ''), re.IGNORECASE)) or
