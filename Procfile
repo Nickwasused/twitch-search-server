@@ -1,1 +1,1 @@
-web: gunicorn app:app
+uvicorn main:app
