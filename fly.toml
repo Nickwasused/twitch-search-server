@@ -12,7 +12,6 @@ kill_timeout = "5s"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 1
-  processes = ["main"]
 
 [[http_service.checks]]
   grace_period = "10s"
