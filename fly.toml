@@ -1,5 +1,5 @@
 app = "twitch-search-server"
-primary_region = "ams"
+primary_region = "waw"
 kill_signal = "SIGINT"
 kill_timeout = "5s"
 
@@ -18,7 +18,7 @@ kill_timeout = "5s"
   interval = "30s"
   method = "GET"
   timeout = "5s"
-  path = "/?title=(luckyv|lucky v)"
+  path = "/?title=luckyv"
 
 [[vm]]
   size = "shared-cpu-1x"
