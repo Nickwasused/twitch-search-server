@@ -1,13 +1,13 @@
-FROM python:3.12-alpine
+FROM python:alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir 'uvicorn[standard]'
+COPY requirements.txt .
+RUN pip install --no-cache-dir --no-input -r requirements.txt
+RUN pip install --no-cache-dir --no-input uvicorn
+RUN rm /app/requirements.txt
 
 COPY . .
 
 EXPOSE 8000
-
-CMD [ "uvicorn", "main:app", "--host=0.0.0.0" ]
+ENTRYPOINT [ "uvicorn", "main:app", "--proxy-headers", "--host=0.0.0.0" ]
