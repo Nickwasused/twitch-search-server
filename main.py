@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 from contextlib import asynccontextmanager
-
-import uvicorn
-
 from fetch import Handler, Streamer
 from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
+import uvicorn
 
 handler = Handler()
 
