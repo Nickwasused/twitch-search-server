@@ -1,13 +1,33 @@
 #!/usr/bin/env python3
+from contextlib import asynccontextmanager
+
+import uvicorn
+
 from fetch import Handler, Streamer
-from fastapi_utils.tasks import repeat_every
 from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 handler = Handler()
-app = FastAPI()
 
+
+async def update_streamers(wait: int = 300):
+    while True:
+        handler.get_streamers()
+        await asyncio.sleep(wait)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """background task starts at startup
+    https://stackoverflow.com/a/78046933
+    """
+    _streamer_task = asyncio.create_task(update_streamers())
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,8 +59,5 @@ async def index(title: str | None = None,
     else:
         return "The docs are at /docs You can search by adding url parameters e.g. ?title=gta"
 
-
-@app.on_event("startup")
-@repeat_every(seconds=300)
-def update_streamers():
-    handler.get_streamers()
+if __name__ == "__main__":
+    uvicorn.run(app, log_config="log_conf.yaml")

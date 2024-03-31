@@ -7,7 +7,7 @@ import logging
 import re
 import os
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 load_dotenv()
 auth = Auth()
 
@@ -39,6 +39,7 @@ class Handler:
         self.get_streamers()
 
     def get_streamers(self):
+        streamer_session = requests.Session()
         token = auth.token
         streamer_url = "https://api.twitch.tv/helix/streams"
 
@@ -46,7 +47,7 @@ class Handler:
 
         fetching = True
         tmp_cursor = ""
-        tmp_headers = {
+        streamer_session.headers = {
             'content-type': 'application/json',
             'client-id': os.getenv('CLIENT_ID'),
             'Authorization': f'Bearer {token}'
@@ -59,9 +60,9 @@ class Handler:
                 tmp_url += f"&after={tmp_cursor}"
 
             try:
-                stream_request = requests.get(tmp_url, headers=tmp_headers)
+                stream_request = streamer_session.get(tmp_url)
             except Exception as e:
-                logging.error(f"exception while fetching streams: {e}")
+                logger.error(f"exception while fetching streams: {e}")
                 fetching = False
                 continue
 
@@ -70,13 +71,13 @@ class Handler:
                     auth.get_token()
                     continue
                 except Exception as e:
-                    logging.error(f"exception while getting token: {e}")
+                    logger.error(f"exception while getting token: {e}")
                     fetching = False
                     continue
 
             tmp_fetched_streams = stream_request.json()
             if not tmp_fetched_streams:
-                logging.error("fetched streams but with error")
+                logger.error("fetched streams but with error")
                 fetching = False
             else:
                 streamers = [*streamers, *tmp_fetched_streams["data"]]
@@ -97,12 +98,12 @@ class Handler:
         # deduplication
         tmp_converted_streams = list(dict.fromkeys(tmp_converted_streams))
 
-        logging.info(f"fetched {len(tmp_converted_streams)} streams")
+        logger.info(f"fetched {len(tmp_converted_streams)} streams")
         self.streamers = tmp_converted_streams
+        streamer_session.close()
 
     def filter_streams(self, search: dict):
         filtered_streamers = []
-        print(search)
         for streamer in self.streamers:
             match = all(
                 (field == 'title' and re.search(value, getattr(streamer, field, ''), re.IGNORECASE)) or
@@ -112,3 +113,6 @@ class Handler:
             if match:
                 filtered_streamers.append(streamer)
         return filtered_streamers
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.streamers = []
