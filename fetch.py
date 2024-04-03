@@ -48,9 +48,9 @@ class Handler:
         fetching = True
         tmp_cursor = ""
         streamer_session.headers = {
-            'content-type': 'application/json',
-            'client-id': os.getenv('CLIENT_ID'),
-            'Authorization': f'Bearer {token}'
+            "content-type": "application/json",
+            "client-id": os.getenv("CLIENT_ID"),
+            "Authorization": f"Bearer {token}",
         }
 
         while fetching:
@@ -82,9 +82,12 @@ class Handler:
             else:
                 streamers = [*streamers, *tmp_fetched_streams["data"]]
 
-                if tmp_fetched_streams["pagination"] == {} or "pagination" in tmp_fetched_streams \
-                        and not tmp_fetched_streams["pagination"]["cursor"] or \
-                        tmp_fetched_streams["pagination"]["cursor"] == "IA":
+                if (
+                    tmp_fetched_streams["pagination"] == {}
+                    or "pagination" in tmp_fetched_streams
+                    and not tmp_fetched_streams["pagination"]["cursor"]
+                    or tmp_fetched_streams["pagination"]["cursor"] == "IA"
+                ):
                     fetching = False
                     continue
                 else:
@@ -106,8 +109,11 @@ class Handler:
         filtered_streamers = []
         for streamer in self.streamers:
             match = all(
-                (field == 'title' and re.search(value, getattr(streamer, field, ''), re.IGNORECASE)) or
-                (field != 'title' and getattr(streamer, field, None) == value)
+                (
+                    field == "title"
+                    and re.search(value, getattr(streamer, field, ""), re.IGNORECASE)
+                )
+                or (field != "title" and getattr(streamer, field, None) == value)
                 for field, value in search.items()
             )
             if match:

@@ -15,7 +15,15 @@ s = sched.scheduler(time.time, time.sleep)
 
 def update_streamers(sc: sched.scheduler, wait: float = 300):
     handler.get_streamers()
-    sc.enter(wait, 1, update_streamers, (sc, wait,))
+    sc.enter(
+        wait,
+        1,
+        update_streamers,
+        (
+            sc,
+            wait,
+        ),
+    )
     sc.run()
 
 
@@ -38,19 +46,21 @@ app.add_middleware(
 
 
 @app.get("/")
-async def index(title: str | None = None,
-                game_id: str | None = None,
-                game_name: str | None = None,
-                language: str | None = None,
-                is_mature: bool | None = None,
-                type: str | None = None) -> list[Streamer] | str:
+async def index(
+    title: str | None = None,
+    game_id: str | None = None,
+    game_name: str | None = None,
+    language: str | None = None,
+    is_mature: bool | None = None,
+    type: str | None = None,
+) -> list[Streamer] | str:
     search_query = {
         "title": title,
         "game_id": game_id,
         "game_name": game_name,
         "language": language,
         "is_mature": is_mature,
-        "type": type
+        "type": type,
     }
     search_query = {k: v for k, v in search_query.items() if v is not None and not ""}
 
@@ -58,6 +68,7 @@ async def index(title: str | None = None,
         return jsonable_encoder(handler.filter_streams(search_query))
     else:
         return "The docs are at /docs You can search by adding url parameters e.g. ?title=gta"
+
 
 if __name__ == "__main__":
     uvicorn.run(app, log_config="log_conf.yaml")
