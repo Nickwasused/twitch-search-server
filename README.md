@@ -69,5 +69,5 @@ The code is formatted and checked with [ruff](https://github.com/astral-sh/ruff)
 - [FastAPI](https://fastapi.tiangolo.com/) - API Framework
 - [Uvicorn](https://www.uvicorn.org/) - ASGI web server
 
-### Affiliation <a name = "affiliation"></a>
+## Affiliation <a name = "affiliation"></a>
 I am not affiliated with Twitch Interactive, Inc.
