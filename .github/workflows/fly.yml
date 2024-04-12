@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**.py'
+      - '**.yaml'
+      - 'Dockerfile'
+      - 'requirements.txt'
 env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 jobs:
