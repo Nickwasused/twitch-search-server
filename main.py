@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import Gauge, Histogram
 from fastapi.encoders import jsonable_encoder
 from prometheus_client import make_asgi_app
 from contextlib import asynccontextmanager
 from fetch import Handler, Streamer
+from prometheus_client import Gauge
 from threading import Thread
 from fastapi import FastAPI
 import logging
@@ -19,12 +19,12 @@ s = sched.scheduler(time.time, time.sleep)
 
 metrics_app = make_asgi_app()
 gauge_streamers = Gauge("streamers", "the current count of streamers", unit="streamers")
-histogram_fetch = Histogram("fetch", "time it takes to fetch streamers", unit="seconds")
+histogram_fetch = Gauge("fetch", "time it takes to fetch streamers", unit="seconds")
 
 
 def update_streamers(sc: sched.scheduler, wait: float = 300):
     tmp_count, tmp_time = handler.get_streamers()
-    gauge_streamers.set(tmp_count), histogram_fetch.observe(tmp_time)
+    gauge_streamers.set(tmp_count), histogram_fetch.set(tmp_time)
     logger.info(f"fetched {tmp_count} streams in {tmp_time:.4f} seconds")
     sc.enter(
         wait,
