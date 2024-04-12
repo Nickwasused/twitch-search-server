@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from auth import Auth
 import requests
 import logging
+import time
 import re
 import os
 
@@ -38,7 +39,8 @@ class Handler:
         self.streamers = []
         self.get_streamers()
 
-    def get_streamers(self):
+    def get_streamers(self) -> [int, float]:
+        start = time.perf_counter()
         streamer_session = requests.Session()
         token = auth.token
         streamer_url = "https://api.twitch.tv/helix/streams"
@@ -100,10 +102,11 @@ class Handler:
 
         # deduplication
         tmp_converted_streams = list(dict.fromkeys(tmp_converted_streams))
-
-        logger.info(f"fetched {len(tmp_converted_streams)} streams")
+        tmp_count = len(tmp_converted_streams)
         self.streamers = tmp_converted_streams
         streamer_session.close()
+        end = time.perf_counter() - start
+        return tmp_count, end
 
     def filter_streams(self, search: dict):
         filtered_streamers = []
