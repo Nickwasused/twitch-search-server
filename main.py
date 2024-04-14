@@ -89,4 +89,4 @@ async def index(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, log_config="log_conf.yaml")
+    uvicorn.run(app, log_config="log_conf.yaml", access_log=True)
