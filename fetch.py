@@ -37,11 +37,11 @@ class Streamer:
 class Handler:
     def __init__(self):
         self.streamers = []
-        self.get_streamers()
+        self.session = requests.Session()
 
     def get_streamers(self) -> [int, float]:
         start = time.perf_counter()
-        streamer_session = requests.Session()
+
         token = auth.token
         streamer_url = "https://api.twitch.tv/helix/streams"
 
@@ -49,7 +49,7 @@ class Handler:
 
         fetching = True
         tmp_cursor = ""
-        streamer_session.headers = {
+        self.session.headers = {
             "content-type": "application/json",
             "client-id": os.getenv("CLIENT_ID"),
             "Authorization": f"Bearer {token}",
@@ -62,7 +62,7 @@ class Handler:
                 tmp_url += f"&after={tmp_cursor}"
 
             try:
-                stream_request = streamer_session.get(tmp_url)
+                stream_request = self.session.get(tmp_url)
             except Exception as e:
                 logger.error(f"exception while fetching streams: {e}")
                 fetching = False
@@ -86,8 +86,6 @@ class Handler:
 
                 if (
                     tmp_fetched_streams["pagination"] == {}
-                    or "pagination" in tmp_fetched_streams
-                    and not tmp_fetched_streams["pagination"]["cursor"]
                     or tmp_fetched_streams["pagination"]["cursor"] == "IA"
                 ):
                     fetching = False
@@ -104,7 +102,6 @@ class Handler:
         tmp_converted_streams = list(dict.fromkeys(tmp_converted_streams))
         tmp_count = len(tmp_converted_streams)
         self.streamers = tmp_converted_streams
-        streamer_session.close()
         end = time.perf_counter() - start
         return tmp_count, end
 
@@ -124,4 +121,5 @@ class Handler:
         return filtered_streamers
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.session.close()
         self.streamers = []
