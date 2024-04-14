@@ -10,7 +10,6 @@ import os
 
 logger = logging.getLogger(__name__)
 load_dotenv()
-auth = Auth()
 
 
 @dataclass
@@ -38,27 +37,29 @@ class Handler:
     def __init__(self):
         self.streamers = []
         self.session = requests.Session()
+        self.client_id = os.getenv("CLIENT_ID")
+        self.game_id = os.getenv("GAME_ID")
+        self.lang = os.getenv("TWITCH_LANG")
+        self.default_url = f"https://api.twitch.tv/helix/streams?first=100&type=live&language={self.lang}&game_id={self.game_id}"
+        self.session.headers = {
+            "content-type": "application/json",
+            "client-id": self.client_id,
+        }
+        self.auth = Auth()
+        self.token = self.auth.token
 
     def get_streamers(self) -> [int, float]:
         start = time.perf_counter()
-
-        token = auth.token
-        streamer_url = "https://api.twitch.tv/helix/streams"
-
         streamers: [Streamer] = []
 
         fetching = True
         tmp_cursor = ""
-        self.session.headers = {
-            "content-type": "application/json",
-            "client-id": os.getenv("CLIENT_ID"),
-            "Authorization": f"Bearer {token}",
-        }
+        self.session.headers.update({"Authorization": f"Bearer {self.token}"})
 
         while fetching:
-            tmp_url = f"{streamer_url}?first=100&type=live&language={os.getenv('TWITCH_LANG')}&game_id={os.getenv('GAME_ID')}"
+            tmp_url = self.default_url
 
-            if tmp_cursor != "":
+            if tmp_cursor:
                 tmp_url += f"&after={tmp_cursor}"
 
             try:
@@ -70,7 +71,8 @@ class Handler:
 
             if stream_request.status_code == 401:
                 try:
-                    auth.get_token()
+                    self.auth.get_token()
+                    self.token = self.auth.token
                     continue
                 except Exception as e:
                     logger.error(f"exception while getting token: {e}")
@@ -85,7 +87,7 @@ class Handler:
                 streamers = [*streamers, *tmp_fetched_streams["data"]]
 
                 if (
-                    tmp_fetched_streams["pagination"] == {}
+                    not tmp_fetched_streams["pagination"]
                     or tmp_fetched_streams["pagination"]["cursor"] == "IA"
                 ):
                     fetching = False
