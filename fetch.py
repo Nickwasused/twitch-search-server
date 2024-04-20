@@ -36,64 +36,64 @@ class Streamer:
 class Handler:
     def __init__(self):
         self.streamers = []
-        self.session = requests.Session()
         self.client_id = os.getenv("CLIENT_ID")
         self.game_id = os.getenv("GAME_ID")
         self.lang = os.getenv("TWITCH_LANG")
         self.default_url = f"https://api.twitch.tv/helix/streams?first=100&type=live&language={self.lang}&game_id={self.game_id}"
-        self.session.headers = {
-            "content-type": "application/json",
-            "client-id": self.client_id,
-        }
         self.auth = Auth()
-        self.token = self.auth.token
 
     def get_streamers(self) -> [int, float]:
         start = time.perf_counter()
         streamers: [Streamer] = []
 
-        fetching = True
-        tmp_cursor = ""
-        self.session.headers.update({"Authorization": f"Bearer {self.token}"})
+        with requests.Session() as session:
+            fetching = True
+            tmp_cursor = ""
+            session.headers.update(
+                {
+                    "Authorization": f"Bearer {self.auth.token}",
+                    "content-type": "application/json",
+                    "client-id": self.client_id,
+                }
+            )
 
-        while fetching:
-            tmp_url = self.default_url
+            while fetching:
+                tmp_url = self.default_url
 
-            if tmp_cursor:
-                tmp_url += f"&after={tmp_cursor}"
+                if tmp_cursor:
+                    tmp_url += f"&after={tmp_cursor}"
 
-            try:
-                stream_request = self.session.get(tmp_url)
-            except Exception as e:
-                logger.error(f"exception while fetching streams: {e}")
-                fetching = False
-                continue
-
-            if stream_request.status_code == 401:
                 try:
-                    self.auth.get_token()
-                    self.token = self.auth.token
-                    continue
+                    stream_request = session.get(tmp_url)
                 except Exception as e:
-                    logger.error(f"exception while getting token: {e}")
+                    logger.error(f"exception while fetching streams: {e}")
                     fetching = False
                     continue
 
-            tmp_fetched_streams = stream_request.json()
-            if not tmp_fetched_streams:
-                logger.error("fetched streams but with error")
-                fetching = False
-            else:
-                streamers = [*streamers, *tmp_fetched_streams["data"]]
+                if stream_request.status_code == 401:
+                    try:
+                        self.auth.get_token()
+                        continue
+                    except Exception as e:
+                        logger.error(f"exception while getting token: {e}")
+                        fetching = False
+                        continue
 
-                if (
-                    not tmp_fetched_streams["pagination"]
-                    or tmp_fetched_streams["pagination"]["cursor"] == "IA"
-                ):
+                tmp_fetched_streams = stream_request.json()
+                if not tmp_fetched_streams:
+                    logger.error("fetched streams but with error")
                     fetching = False
-                    continue
                 else:
-                    tmp_cursor = tmp_fetched_streams["pagination"]["cursor"]
+                    streamers = [*streamers, *tmp_fetched_streams["data"]]
+
+                    if (
+                        not tmp_fetched_streams["pagination"]
+                        or tmp_fetched_streams["pagination"]["cursor"] == "IA"
+                    ):
+                        fetching = False
+                        continue
+                    else:
+                        tmp_cursor = tmp_fetched_streams["pagination"]["cursor"]
 
         tmp_converted_streams: [Streamer] = []
         for item in streamers:
@@ -123,5 +123,4 @@ class Handler:
         return filtered_streamers
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.session.close()
         self.streamers = []
