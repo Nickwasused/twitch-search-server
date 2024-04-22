@@ -35,22 +35,21 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 Install the required packages and uvicorn by running:
-```
+```shell
 pip install -r requirements.txt
 pip install uvicorn[standard]
 ```
 
 After that copy the example Environment variables to use them:
-```
+```shell
 cp .env.example .env
 ```
 
 Now you need to fill in the missing values in the `.env` file.
 
 ## 🎈 Usage <a name="usage"></a>
-Only one endpoint is available which is at the domain root `/`.  
-You can filter by the following:   
-`title`, `game_id`, `game_name`, `language`, `is_mature` and `type`. 
+Only one endpoint is available which is at `/search`.  
+You can filter the streams by `title`.
 
 There are automatically generated docs at [http://localhost:8000/docs](http://localhost:8000/docs) or [https://tts-de-gta5.nickwasused.com/docs](https://tts-de-gta5.nickwasused.com/docs)
 

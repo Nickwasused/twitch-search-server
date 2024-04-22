@@ -6,7 +6,6 @@ from requests import Session
 from auth import Auth
 import logging
 import time
-import re
 import os
 
 logger = logging.getLogger(__name__)
@@ -109,19 +108,14 @@ class Handler:
         end = time.perf_counter() - start
         return tmp_count, end
 
-    def filter_streams(self, search: dict):
-        filtered_streamers = []
-        for streamer in self.streamers:
-            match = all(
-                (
-                    field == "title"
-                    and re.search(value, getattr(streamer, field, ""), re.IGNORECASE)
-                )
-                or (field != "title" and getattr(streamer, field, None) == value)
-                for field, value in search.items()
-            )
-            if match:
-                filtered_streamers.append(streamer)
+    def filter_streams(self, query: str):
+        query_words = query.split()
+        filtered_streamers = [
+            streamer
+            for streamer in self.streamers
+            if all(word.lower() in streamer.title.lower() for word in query_words)
+        ]
+
         return filtered_streamers
 
     def __exit__(self, exc_type, exc_val, exc_tb):

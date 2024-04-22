@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.encoders import jsonable_encoder
 from prometheus_client import make_asgi_app
 from contextlib import asynccontextmanager
@@ -57,35 +58,28 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def index(
-    title: str | None = None,
-    game_id: str | None = None,
-    game_name: str | None = None,
-    language: str | None = None,
-    is_mature: bool | None = None,
-    type: str | None = None,
+@app.get("/search")
+def search(
+    tmp_query: str | None = None,
 ) -> list[Streamer] | dict:
-    search_query = {
-        "title": title,
-        "game_id": game_id,
-        "game_name": game_name,
-        "language": language,
-        "is_mature": is_mature,
-        "type": type,
-    }
-    search_query = {k: v for k, v in search_query.items() if v is not None and not ""}
-
-    if search_query and search_query != {}:
-        return jsonable_encoder(handler.filter_streams(search_query))
-    else:
+    if tmp_query:
+        tmp_streamers = handler.filter_streams(tmp_query)
         return jsonable_encoder(
             {
-                "status": "empty query",
-                "docs": "The docs are at /docs You can search by adding url parameters e.g. ?title=gta",
-                "metrics": "The metrics are at /metrics",
+                "status": "200",
+                "message": f"returned {len(tmp_streamers)} streamers",
+                "data": tmp_streamers,
             }
         )
+    else:
+        return jsonable_encoder(
+            {"status": "500", "message": "You need to supply a query.", "data": []}
+        )
+
+
+@app.get("/")
+def index() -> RedirectResponse:
+    return RedirectResponse("/docs", 301)
 
 
 if __name__ == "__main__":
