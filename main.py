@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from prometheus_client import make_asgi_app
 from contextlib import asynccontextmanager
-from fetch import Handler, Streamer
+from models import Streamer, ResponseModel
 from prometheus_client import Gauge
 from threading import Thread
 from fastapi import FastAPI
+from fetch import Handler
 import logging
 import uvicorn
 import sched
@@ -61,19 +62,19 @@ app.add_middleware(
 @app.get("/search")
 def search(
     tmp_query: str | None = None,
-) -> list[Streamer] | dict:
+) -> ResponseModel:
     if tmp_query:
-        tmp_streamers = handler.filter_streams(tmp_query)
+        tmp_streamers: list[Streamer] = handler.filter_streams(tmp_query)
         return jsonable_encoder(
             {
-                "status": "200",
+                "status": 200,
                 "message": f"returned {len(tmp_streamers)} streamers",
                 "data": tmp_streamers,
             }
         )
     else:
         return jsonable_encoder(
-            {"status": "500", "message": "You need to supply a query.", "data": []}
+            {"status": 500, "message": "You need to supply a query.", "data": []}
         )
 
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from http.cookiejar import DefaultCookiePolicy
-from dataclasses import dataclass
 from dotenv import load_dotenv
 from requests import Session
+from models import Streamer
 from auth import Auth
 import logging
 import time
@@ -10,27 +10,6 @@ import os
 
 logger = logging.getLogger(__name__)
 load_dotenv()
-
-
-@dataclass
-class Streamer:
-    id: str
-    user_id: str
-    user_login: str
-    user_name: str
-    game_id: str
-    game_name: str
-    type: str
-    title: str
-    viewer_count: int
-    started_at: str
-    language: str
-    thumbnail_url: str
-    tags: list[str]
-    is_mature: bool
-
-    def __hash__(self):
-        return int(self.id)
 
 
 class Handler:
