@@ -17,7 +17,7 @@ kill_timeout = "5s"
   interval = "30s"
   method = "GET"
   timeout = "5s"
-  path = "/?title=luckyv"
+  path = "/search?title=luckyv"
 
 [[metrics]]
 port = 8000
