@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+from http.cookiejar import DefaultCookiePolicy
 from dataclasses import dataclass
 from dotenv import load_dotenv
+from requests import Session
 from auth import Auth
-import requests
 import logging
 import time
 import re
@@ -46,7 +47,8 @@ class Handler:
         start = time.perf_counter()
         streamers: [Streamer] = []
 
-        with requests.Session() as session:
+        with Session() as session:
+            session.cookies.set_policy(DefaultCookiePolicy(allowed_domains=[]))
             fetching = True
             tmp_cursor = ""
             session.headers.update(
