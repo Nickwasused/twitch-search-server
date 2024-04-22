@@ -6,6 +6,7 @@ on:
     paths:
       - '**.py'
       - '**.yaml'
+      - '**.toml'
       - 'Dockerfile'
       - 'requirements.txt'
 env:
