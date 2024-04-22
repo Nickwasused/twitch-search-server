@@ -61,10 +61,10 @@ app.add_middleware(
 
 @app.get("/search")
 def search(
-    tmp_query: str | None = None,
+    query: str | None = None,
 ) -> ResponseModel:
-    if tmp_query:
-        tmp_streamers: list[Streamer] = handler.filter_streams(tmp_query)
+    if query:
+        tmp_streamers: list[Streamer] = handler.filter_streams(query)
         return jsonable_encoder(
             {
                 "status": 200,
