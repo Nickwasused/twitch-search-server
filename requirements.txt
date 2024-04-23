@@ -3,4 +3,4 @@ prometheus_client==0.20.0
 python-dotenv==1.0.1
 Requests==2.31.0
 uvicorn==0.24.0.post1
-pydantic==1.10.13
+pydantic==2.7.0
