@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from http.cookiejar import DefaultCookiePolicy
 from dotenv import load_dotenv
-from requests import Session
 from models import Streamer
 from auth import Auth
+import urllib3
 import logging
 import time
 import os
@@ -25,17 +25,14 @@ class Handler:
         start = time.perf_counter()
         streamers: [Streamer] = []
 
-        with Session() as session:
-            session.cookies.set_policy(DefaultCookiePolicy(allowed_domains=[]))
+        with urllib3.PoolManager(num_pools=50) as http:
             fetching = True
             tmp_cursor = ""
-            session.headers.update(
-                {
-                    "Authorization": f"Bearer {self.auth.token}",
-                    "content-type": "application/json",
-                    "client-id": self.client_id,
-                }
-            )
+            http.headers = {
+                "Authorization": f"Bearer {self.auth.token}",
+                "content-type": "application/json",
+                "client-id": self.client_id,
+            }
 
             while fetching:
                 tmp_url = self.default_url
@@ -44,13 +41,13 @@ class Handler:
                     tmp_url += f"&after={tmp_cursor}"
 
                 try:
-                    stream_request = session.get(tmp_url)
+                    stream_request = http.request("GET", tmp_url)
                 except Exception as e:
                     logger.error(f"exception while fetching streams: {e}")
                     fetching = False
                     continue
 
-                if stream_request.status_code == 401:
+                if stream_request.status == 401:
                     try:
                         self.auth.get_token()
                         continue
