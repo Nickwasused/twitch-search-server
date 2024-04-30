@@ -1,7 +1,7 @@
 fastapi==0.110.2
 prometheus_client==0.20.0
 python-dotenv==1.0.1
-uvicorn==0.24.0.post1
+uvicorn==0.29.0
 pydantic==2.7.1
 requests==2.31.0
 urllib3==2.2.1
