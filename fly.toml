@@ -19,10 +19,6 @@ kill_timeout = "5s"
   timeout = "5s"
   path = "/search?title=luckyv"
 
-[[metrics]]
-port = 8000
-path = "/metrics"
-
 [[vm]]
   size = "shared-cpu-1x"
   memory = "256mb"

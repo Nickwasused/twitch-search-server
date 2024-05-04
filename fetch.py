@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from http.cookiejar import DefaultCookiePolicy
 from dotenv import load_dotenv
 from models import Streamer
 from auth import Auth
