@@ -4,8 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from models import Streamer, ResponseModel
 from fastapi import FastAPI
-from fetch import Handler
-import cachetools.func
+from fetch import filter_streams
 import logging
 import uvicorn
 
@@ -21,20 +20,12 @@ app.add_middleware(
 )
 
 
-@cachetools.func.ttl_cache(ttl=10 * 60)
-def get_data():
-    tmp_handler = Handler()
-    tmp_handler.get_streamers()
-    return tmp_handler
-
-
 @app.get("/search")
 def search(
     query: str | None = None,
 ) -> ResponseModel:
     if query:
-        tmp_handler = get_data()
-        tmp_streamers: list[Streamer] = tmp_handler.filter_streams(query)
+        tmp_streamers: list[Streamer] = filter_streams(query)
         return jsonable_encoder(
             {
                 "status": 200,
@@ -46,6 +37,11 @@ def search(
         return jsonable_encoder(
             {"status": 500, "message": "You need to supply a query.", "data": []}
         )
+
+
+@app.get("/status")
+def status() -> ResponseModel:
+    return jsonable_encoder({"status": 200, "message": "ok", "data": []})
 
 
 @app.get("/")
